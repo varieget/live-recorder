@@ -1,0 +1,11 @@
+{
+  "cmd": "WELCOME",
+  "data": {
+    "uid": 14295657,
+    "uname": "铭澐白虎",
+    "is_admin": false,
+    "svip": 0,
+    "vip": 1,
+    "mock_effect": 0
+  }
+}

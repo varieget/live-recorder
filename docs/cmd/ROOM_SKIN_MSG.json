@@ -1,0 +1,11 @@
+{
+  "cmd": "ROOM_SKIN_MSG",
+  "skin_id": 134,
+  "status": 1,
+  "end_time": 1581168544,
+  "current_time": 1580909344,
+  "scatter": {
+    "min": 1,
+    "max": 200
+  }
+}

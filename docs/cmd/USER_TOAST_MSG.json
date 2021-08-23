@@ -1,0 +1,19 @@
+{
+  "cmd": "USER_TOAST_MSG",
+  "data": {
+    "op_type": 1,
+    "uid": 323353088,
+    "username": "侵蚀的雪豹",
+    "guard_level": 3,
+    "is_show": 0,
+    "anchor_show": true,
+    "user_show": true,
+    "toast_msg": "\u003c%侵蚀的雪豹%\u003e开通了主播的舰长",
+    "num": 1,
+    "price": 198000,
+    "role_name": "舰长",
+    "unit": "月",
+    "start_time": 1580649324,
+    "end_time": 1580649324
+  }
+}

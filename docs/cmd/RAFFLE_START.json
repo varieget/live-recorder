@@ -1,0 +1,27 @@
+{
+  "cmd": "RAFFLE_START",
+  "data": {
+    "asset_animation_pic": "https://i0.hdslb.com/bfs/live/981dbe25838da1191be07ee3aaa6c50684df8891.gif",
+    "asset_icon": "http://s1.hdslb.com/bfs/live/8a5a9bde41cf49cd142f48e84b948c22fde83a11.png",
+    "asset_tips_pic": "http://s1.hdslb.com/bfs/live/8a5a9bde41cf49cd142f48e84b948c22fde83a11.png",
+    "dtime": 120,
+    "from": "忆白白の",
+    "from_user": {
+      "face": "http://i1.hdslb.com/bfs/face/f9f750d78ff1aa7c96b3cb0032a9811ec388ed89.jpg",
+      "uname": "忆白白の"
+    },
+    "gift_id": 30465,
+    "id": "696532",
+    "max_time": 120,
+    "msg": "",
+    "payflow_id": "1",
+    "raffleId": 696532,
+    "sender_type": 0,
+    "thank_text": "感谢<%忆白白の%>赠送的欢心",
+    "time": 120,
+    "time_wait": 60,
+    "title": "欢心抽奖",
+    "type": "GIFT_30465",
+    "weight": 0
+  }
+}
