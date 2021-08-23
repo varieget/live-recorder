@@ -7,7 +7,6 @@ const { getInfoByRoom } = require('./get-info');
 let roomId; // shortId
 let ts; // 开始时间戳
 
-// ./5440/${ts}/
 let getDir = (filename = '') =>
   path.resolve(__dirname, `../../record/${roomId}/${ts}/${filename}`);
 
@@ -116,7 +115,7 @@ module.exports = async function (shortId) {
 
   new Client({
     roomId: room_info.room_id, // 真实 roomId
-    console: false,
+    log: (...rest) => console.log(room_info.room_id, '=>', ...rest),
     // Client callback
     notify(msgBody) {
       const { op, body } = msgBody;
