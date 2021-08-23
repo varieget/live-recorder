@@ -1,0 +1,19 @@
+{
+  "cmd": "COMBO_SEND",
+  "data": {
+    "uid": 24215442,
+    "ruid": "9352921",
+    "uname": "\u745e\u745eOAO",
+    "r_uname": "\u50d5\u306f\u591a\u96f7\u8bfa\u3067\u3059",
+    "combo_num": 2,
+    "gift_id": 20014,
+    "gift_num": 0,
+    "batch_combo_num": 2,
+    "gift_name": "\u6bd4\u5fc3",
+    "action": "\u6295\u5582",
+    "combo_id": "gift:combo_id:24215442:9352921:20014:1580651414.416",
+    "batch_combo_id": "batch:gift:combo_id:24215442:9352921:20014:1:1580651414.4171",
+    "is_show": 1,
+    "send_master": {}
+  }
+}

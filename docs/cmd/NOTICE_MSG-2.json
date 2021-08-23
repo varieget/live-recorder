@@ -1,0 +1,38 @@
+{
+  "cmd": "NOTICE_MSG",
+  "full": {
+    "head_icon": "http://i0.hdslb.com/bfs/live/b29add66421580c3e680d784a827202e512a40a0.webp",
+    "tail_icon": "http://i0.hdslb.com/bfs/live/822da481fdaba986d738db5d8fd469ffa95a8fa1.webp",
+    "head_icon_fa": "http://i0.hdslb.com/bfs/live/49869a52d6225a3e70bbf1f4da63f199a95384b2.png",
+    "tail_icon_fa": "http://i0.hdslb.com/bfs/live/38cb2a9f1209b16c0f15162b0b553e3b28d9f16f.png",
+    "head_icon_fan": 24,
+    "tail_icon_fan": 4,
+    "background": "#66A74EFF",
+    "color": "#FFFFFFFF",
+    "highlight": "#FDFF2FFF",
+    "time": 20
+  },
+  "half": {
+    "head_icon": "http://i0.hdslb.com/bfs/live/ec9b374caec5bd84898f3780a10189be96b86d4e.png",
+    "tail_icon": "",
+    "background": "#85B971FF",
+    "color": "#FFFFFFFF",
+    "highlight": "#FDFF2FFF",
+    "time": 15
+  },
+  "side": {
+    "head_icon": "http://i0.hdslb.com/bfs/live/e41c7e12b1e08724d2ab2f369515132d30fe1ef7.png",
+    "background": "#F4FDE8FF",
+    "color": "#79B48EFF",
+    "highlight": "#388726FF",
+    "border": "#A9DA9FFF"
+  },
+  "roomid": 8603641,
+  "real_roomid": 8603641,
+  "msg_common": "<%\u5d29\u574f3\u7b2c\u4e00\u5076\u50cf\u7231\u9171%>\u6295\u5582<%\u7d22\u83f2\u4e40%>1\u4e2a\u5c0f\u7535\u89c6\u98de\u8239\uff0c\u70b9\u51fb\u524d\u5f80TA\u7684\u623f\u95f4\u53bb\u62bd\u5956\u5427",
+  "msg_self": "<%\u5d29\u574f3\u7b2c\u4e00\u5076\u50cf\u7231\u9171%>\u6295\u5582<%\u7d22\u83f2\u4e40%>1\u4e2a\u5c0f\u7535\u89c6\u98de\u8239\uff0c\u5feb\u6765\u62bd\u5956\u5427",
+  "link_url": "http://live.bilibili.com/8603641?live_lottery_type=1&broadcast_type=0",
+  "msg_type": 2,
+  "shield_uid": -1,
+  "business_id": "25"
+}

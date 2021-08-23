@@ -1,0 +1,31 @@
+{
+  "cmd": "GUARD_LOTTERY_START",
+  "data": {
+    "id": 1975349,
+    "link": "https://live.bilibili.com/8592153",
+    "lottery": {
+      "asset_animation_pic": "https://i0.hdslb.com/bfs/vc/ff2a28492970850ce73df0cc144f1766b222d471.gif",
+      "asset_icon": "https://i0.hdslb.com/bfs/vc/43f488e7c4dca5ba6fbdcb88f40052d56bf777d8.png",
+      "id": 1975349,
+      "keyword": "guard",
+      "mobile_animation_asset": "",
+      "mobile_display_mode": 2,
+      "mobile_static_asset": "",
+      "privilege_type": 3,
+      "sender": {
+        "face": "http://static.hdslb.com/images/member/noface.gif",
+        "uid": 323353088,
+        "uname": "侵蚀的雪豹"
+      },
+      "status": 1,
+      "thank_text": "恭喜\u003c%侵蚀的雪豹%\u003e上任舰长",
+      "time": 1200,
+      "time_wait": 0,
+      "weight": 0
+    },
+    "payflow_id": "android_0ae2f3bbb86f17daa6_202002",
+    "privilege_type": 3,
+    "roomid": 8592153,
+    "type": "guard"
+  }
+}

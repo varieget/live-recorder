@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "node packages/recorder",
+    "pm2": "pm2 start packages/recorder",
+    "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
+    "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}

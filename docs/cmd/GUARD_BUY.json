@@ -1,0 +1,14 @@
+{
+  "cmd": "GUARD_BUY",
+  "data": {
+    "uid": 323353088,
+    "username": "侵蚀的雪豹",
+    "guard_level": 3,
+    "num": 1,
+    "price": 198000,
+    "role_name": 10003,
+    "gift_name": "舰长",
+    "start_time": 1580649324,
+    "end_time": 1580649324
+  }
+}

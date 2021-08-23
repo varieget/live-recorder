@@ -1,0 +1,9 @@
+{
+  "broadcast_type": 0,
+  "buy_type": 1,
+  "cmd": "GUARD_MSG",
+  "msg": "用户 :?小孩酱:? 在主播 璇咩 的直播间开通了总督",
+  "msg_new": "\u003c%小孩酱%\u003e 在 \u003c%璇咩%\u003e 的房间开通了总督并触发了抽奖，点击前往TA的房间去抽奖吧",
+  "roomid": 482156,
+  "url": "https://live.bilibili.com/482156"
+}

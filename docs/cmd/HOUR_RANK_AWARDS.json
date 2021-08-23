@@ -1,0 +1,13 @@
+{
+  "cmd": "HOUR_RANK_AWARDS",
+  "action": "all_top3",
+  "data": {
+    "roomid": 544641,
+    "ruid": 8047632,
+    "uname": "哔哩哔哩弹幕网",
+    "face": "http://i1.hdslb.com/bfs/face/8aa6bd8cf269021ffa7a03f7a903ca899c11b7fb.jpg",
+    "rank_desc": "http://i0.hdslb.com/bfs/vc/b48fcb7a0193942844c55e457449de10ed3f045d.png",
+    "content": "恭喜主播获得\n超人气推荐奖励！",
+    "life_cycle": 3
+  }
+}

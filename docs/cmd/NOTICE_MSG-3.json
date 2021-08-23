@@ -1,0 +1,37 @@
+{
+  "roomid": 482156,
+  "msg_common": "\u003c%小孩酱%\u003e在\u003c%璇咩%\u003e的房间开通了总督并触发了抽奖，点击前往TA的房间去抽奖吧",
+  "msg_self": "\u003c%小孩酱%\u003e在本房间开通了总督并触发了抽奖，快来抽奖吧",
+  "link_url": "http://live.bilibili.com/482156?live_lottery_type=2\u0026broadcast_type=",
+  "msg_type": 3,
+  "full": {
+    "head_icon": "http://i0.hdslb.com/bfs/live/d63e78ade2319108390b1d6a59a81b2abe46925d.png",
+    "tail_icon": "http://i0.hdslb.com/bfs/live/822da481fdaba986d738db5d8fd469ffa95a8fa1.webp",
+    "head_icon_fa": "http://i0.hdslb.com/bfs/live/d63e78ade2319108390b1d6a59a81b2abe46925d.png",
+    "tail_icon_fa": "http://i0.hdslb.com/bfs/live/38cb2a9f1209b16c0f15162b0b553e3b28d9f16f.png",
+    "head_icon_fan": 1,
+    "tail_icon_fan": 4,
+    "background": "#FFB03CFF",
+    "color": "#FFFFFFFF",
+    "highlight": "#B25AC1FF",
+    "time": 10
+  },
+  "half": {
+    "head_icon": "",
+    "tail_icon": "",
+    "background": "",
+    "color": "",
+    "highlight": "",
+    "time": 0
+  },
+  "side": {
+    "head_icon": "http://i0.hdslb.com/bfs/live/17c5353140045345f31c7475432920df08351837.png",
+    "background": "#FFE9C8FF",
+    "color": "#EF903AFF",
+    "highlight": "#D54900FF",
+    "border": "#FFCFA4FF"
+  },
+  "shield_uid": 0,
+  "real_roomid": 482156,
+  "cmd": "NOTICE_MSG"
+}
