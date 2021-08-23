@@ -16,7 +16,7 @@ class Client {
 
     const defaultOptions = {
       roomId: 1,
-      console: true,
+      log: () => {},
     };
 
     this.options = { ...defaultOptions, ...options };
@@ -34,45 +34,33 @@ class Client {
     const ws = new WebSocket('wss://broadcastlv.chat.bilibili.com:2245/sub');
     ws.binaryType = 'arraybuffer';
 
-    ws.on('open', function () {
-      if (self.options.console) {
-        console.log('auth start');
-      }
+    const { roomId, log } = self.options;
 
-      ws.send(
-        self.convertToArrayBuffer(
-          JSON.stringify({
-            roomid: self.options.roomId,
-            protover: 2,
-            platform: 'web',
-          }),
-          7
-        )
-      );
+    ws.on('open', function () {
+      log('auth start');
+
+      const token = JSON.stringify({
+        roomid: roomId,
+        protover: 2,
+        platform: 'web',
+      });
+
+      ws.send(self.convertToArrayBuffer(token, 7));
     });
 
     let heartbeatInterval;
 
     ws.on('message', function (data) {
-      let dataView = new DataView(data, 0);
+      const dataView = new DataView(data, 0);
 
-      let ts = Math.floor(Date.now() / 1000);
+      const ts = Math.floor(Date.now() / 1000);
 
-      let { body, packetLen, headerLen, ver, op, seq } = self.convertToObject(
+      const { body, packetLen, headerLen, ver, op, seq } = self.convertToObject(
         data
       );
 
-      if (self.options.console) {
-        if (op !== 3 && op !== 5)
-          console.log(
-            'receiveHeader:',
-            'packetLen=' + packetLen,
-            'headerLen=' + headerLen,
-            'ver=' + ver,
-            'op=' + op,
-            'seq=' + seq,
-            'body=' + body
-          );
+      if (op !== 3 && op !== 5) {
+        log('receiveHeader:', { packetLen, headerLen, ver, op, seq, body });
       }
 
       switch (op) {
@@ -82,17 +70,13 @@ class Client {
           heartbeatInterval = setInterval(function () {
             ws.send(self.convertToArrayBuffer({}, 2));
 
-            if (self.options.console) {
-              console.log('send: heartbeat');
-            }
+            log('send: heartbeat;');
           }, 30 * 1000);
           break;
         case 3:
           // 人气
           // heartbeat reply
-          if (self.options.console) {
-            console.log('receive: heartbeat; online=', body.count);
-          }
+          log('receive: heartbeat;', { online: body.count });
 
           // callback
           self.messageReceived(ver, op, body.count, ts);
@@ -106,18 +90,18 @@ class Client {
           ) {
             // parse
             packetLen = dataView.getInt32(offset);
-            let headerLen = dataView.getInt16(offset + headerOffset);
-            let ver = dataView.getInt16(offset + verOffset);
+            const headerLen = dataView.getInt16(offset + headerOffset);
+            const ver = dataView.getInt16(offset + verOffset);
 
             // callback
             try {
               if (ver === 2) {
                 // 2020-04-10 开始全面压缩
-                let msgBody = data.slice(
+                const msgBody = data.slice(
                   offset + headerLen,
                   offset + packetLen
                 );
-                let bufBody = zlib.inflateSync(new Uint8Array(msgBody));
+                const bufBody = zlib.inflateSync(new Uint8Array(msgBody));
 
                 body = self.convertToObject(bufBody.buffer).body;
               } else {
@@ -128,9 +112,7 @@ class Client {
 
               self.messageReceived(ver, op, JSON.parse(body), ts);
 
-              if (self.options.console) {
-                console.log('messageReceived:', 'ver=' + ver, 'body=' + body);
-              }
+              log('messageReceived:', { ver, body });
             } catch (e) {
               console.error('decode body error:', e);
             }
@@ -141,9 +123,7 @@ class Client {
     });
 
     ws.on('close', function () {
-      if (self.options.console) {
-        console.log('closed');
-      }
+      log('closed');
 
       if (heartbeatInterval) {
         clearInterval(heartbeatInterval);
@@ -176,22 +156,15 @@ class Client {
 
   convertToObject(data) {
     // decode
-    let dataView = new DataView(data, 0);
-    let packetLen = dataView.getInt32(packetOffset);
-    let headerLen = dataView.getInt16(headerOffset);
-    let ver = dataView.getInt16(verOffset);
-    let op = dataView.getInt32(opOffset);
-    let seq = dataView.getInt32(seqOffset);
-    let msgBody = this.textDecoder.decode(data.slice(headerLen, packetLen));
+    const dataView = new DataView(data, 0);
+    const packetLen = dataView.getInt32(packetOffset);
+    const headerLen = dataView.getInt16(headerOffset);
+    const ver = dataView.getInt16(verOffset);
+    const op = dataView.getInt32(opOffset);
+    const seq = dataView.getInt32(seqOffset);
+    const msgBody = this.textDecoder.decode(data.slice(headerLen, packetLen));
 
-    let result = {
-      body: msgBody,
-      packetLen,
-      headerLen,
-      ver,
-      op,
-      seq,
-    };
+    let result = { body: msgBody, packetLen, headerLen, ver, op, seq };
 
     if (op === 3) {
       result.body = {
@@ -204,9 +177,9 @@ class Client {
 
   convertToArrayBuffer(token = '', op) {
     // encode
-    let headerBuf = new ArrayBuffer(rawHeaderLen);
-    let headerView = new DataView(headerBuf, 0);
-    let bodyBuf = this.textEncoder.encode(token);
+    const headerBuf = new ArrayBuffer(rawHeaderLen);
+    const headerView = new DataView(headerBuf, 0);
+    const bodyBuf = this.textEncoder.encode(token);
 
     headerView.setInt32(packetOffset, rawHeaderLen + bodyBuf.byteLength); // 数据包长度
     headerView.setInt16(headerOffset, rawHeaderLen);
@@ -218,7 +191,7 @@ class Client {
   }
 
   mergeArrayBuffer(ab1, ab2) {
-    let u81 = new Uint8Array(ab1),
+    const u81 = new Uint8Array(ab1),
       u82 = new Uint8Array(ab2),
       res = new Uint8Array(ab1.byteLength + ab2.byteLength);
 
