@@ -7,8 +7,10 @@ const { getInfoByRoom } = require('./get-info');
 let roomId; // shortId
 let ts; // 开始时间戳
 
+const taskId = Math.floor(Date.now() / 1000);
+
 let getDir = (filename = '') =>
-  path.resolve(__dirname, `../../record/${roomId}/${ts}/${filename}`);
+  path.resolve(__dirname, `../../record_${taskId}/${roomId}/${ts}/${filename}`);
 
 function init() {
   // 初始化前需停止 loader & 创建新文件夹
@@ -82,11 +84,7 @@ async function loader() {
       }
     })
     .catch((e) => {
-      console.log(e);
-
-      fs.appendFileSync(getDir('err.log'), JSON.stringify(e));
-
-      console.log(`${roomId}: ${ts} fetch catch error.`);
+      console.log(`${roomId}: ${ts} fetch catch error.`, e);
 
       lockerFetch = false;
 

@@ -14,15 +14,10 @@ class Client {
     const MAX_CONNECT_TIMES = 10; // 最多重试次数
     const DELAY = 15000; // 重试间隔
 
-    const defaultOptions = {
-      roomId: 1,
-      log: () => {},
-    };
-
-    this.options = { ...defaultOptions, ...options };
+    this.options = Object.assign({ roomId: 1, log: () => {} }, options);
 
     this.textDecoder = new TextDecoder('utf-8');
-    this.textEncoder = new TextEncoder('utf-8');
+    this.textEncoder = new TextEncoder();
 
     this.connect(MAX_CONNECT_TIMES, DELAY);
   }
@@ -144,13 +139,7 @@ class Client {
     let notify = this.options.notify;
 
     if (notify) {
-      notify({
-        ver,
-        op,
-        ...(cmd ? { cmd } : {}),
-        body,
-        ts,
-      });
+      notify({ ver, op, ...(cmd ? { cmd } : {}), body, ts });
     }
   }
 
