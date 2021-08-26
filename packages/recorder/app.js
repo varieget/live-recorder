@@ -12,12 +12,23 @@ const taskId = Math.floor(Date.now() / 1000);
 let getDir = (filename = '') =>
   path.resolve(__dirname, `../../record_${taskId}/${roomId}/${ts}/${filename}`);
 
-function init() {
+async function init(checkStatus = true) {
   // 初始化前需停止 loader & 创建新文件夹
   ts = Math.floor(Date.now() / 1000);
 
   // mkdir
   fs.mkdirSync(getDir(), { recursive: true });
+
+  if (checkStatus) {
+    const { room_info } = await getInfoByRoom(roomId);
+
+    // 防止启动时已经在直播
+    if (room_info.live_status === 1) {
+      loader();
+    }
+
+    return room_info;
+  }
 }
 
 let loaderInterval;
@@ -39,15 +50,15 @@ async function loader() {
   if (!info.liveStatus) return;
 
   fetchFlv(info.room_id)
-    .then((res) => {
+    .then(async (res) => {
       if (res.ok) {
         if (loaderInterval && !loaderInterval._destroyed) {
           console.log(`${roomId}: clear loader Interval`);
           clearInterval(loaderInterval);
         }
 
-        // 重新初始化
-        init();
+        // 重新初始化目录
+        await init(false);
 
         console.log(`${roomId}: ${ts} fetching.`);
 
@@ -101,25 +112,25 @@ module.exports = async function (shortId) {
   roomId = shortId;
 
   // 初始化
-  init();
+  const { room_id } = await init();
 
-  const { room_info } = await getInfoByRoom(roomId);
-
-  // 防止启动时已经在直播
-  if (room_info.live_status === 1) {
-    // fetchFlv 会初始化
-    loader();
-  }
+  let lastMsgBody;
 
   new Client({
-    roomId: room_info.room_id, // 真实 roomId
-    log: (...rest) => console.log(room_info.room_id, '=>', ...rest),
+    roomId: room_id, // 真实 roomId
+    log: (...rest) => console.log(room_id, '=>', ...rest),
     // Client callback
-    notify(msgBody) {
-      const { op, body } = msgBody;
+    notify: async (msgBody) => {
+      const { op, body, ts } = msgBody;
 
       // msgBody
-      fs.appendFileSync(getDir('sub.json'), `${JSON.stringify(msgBody)}\n`);
+      if (ts - (lastMsgBody?.ts || ts) <= 30) {
+        fs.appendFileSync(getDir('sub.json'), `${JSON.stringify(msgBody)}\n`);
+      } else {
+        await init();
+      }
+
+      lastMsgBody = msgBody;
 
       if (op === 3) {
         // 通过在线人数判断是否开播
