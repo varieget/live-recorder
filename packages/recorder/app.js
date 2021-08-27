@@ -10,20 +10,17 @@ let ctx = {
   lockerFetch: false,
 };
 
-const taskId = Math.floor(Date.now() / 1000);
+const taskId = 'record_' + Math.floor(Date.now() / 1000);
 
-let getDir = (filename = '') =>
-  path.resolve(
-    __dirname,
-    `../../record_${taskId}/${ctx.roomId}/${ctx.ts}/${filename}`
-  );
+const pwd = () =>
+  path.resolve(__dirname, `../../${taskId}/${ctx.roomId}/${ctx.ts}`);
 
 async function init(checkStatus = true) {
-  // 初始化前需停止 loader & 创建新文件夹
+  // 初始化前需停止 loader 再创建新文件夹
   ctx.ts = Math.floor(Date.now() / 1000);
 
   // mkdir
-  fs.mkdirSync(getDir(), { recursive: true });
+  fs.mkdirSync(pwd(), { recursive: true });
 
   if (checkStatus) {
     const { room_info } = await getInfoByRoom(ctx.roomId);
@@ -71,10 +68,10 @@ async function loader() {
         ctx.lockerFetch = true;
 
         // write into room_info.json
-        fs.writeFileSync(getDir('room_info.json'), JSON.stringify(room_info));
+        fs.writeFileSync(pwd() + '/room_info.json', JSON.stringify(room_info));
 
         const filename = path.basename(new URL(res.url).pathname, '.flv');
-        const writer = fs.createWriteStream(getDir(`${filename}.flv`));
+        const writer = fs.createWriteStream(pwd() + `/${filename}.flv`);
 
         // res.body is a Node.js Readable stream
         const reader = res.body;
@@ -130,7 +127,7 @@ module.exports = async function (shortId) {
 
       // msgBody
       if (ts - (lastMsgBody?.ts || ts) <= 30) {
-        fs.appendFileSync(getDir('sub.json'), `${JSON.stringify(msgBody)}\n`);
+        fs.appendFileSync(pwd() + '/sub.json', `${JSON.stringify(msgBody)}\n`);
       } else {
         await init();
       }
