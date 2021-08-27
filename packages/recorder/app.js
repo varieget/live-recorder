@@ -4,23 +4,29 @@ const fetchFlv = require('./fetch-flv');
 const Client = require('sub-client');
 const { getInfoByRoom } = require('./get-info');
 
-let roomId; // shortId
-let ts; // 开始时间戳
+let ctx = {
+  roomId: null, // shortId
+  ts: Math.floor(Date.now() / 1000), // 开始时间戳
+  lockerFetch: false,
+};
 
 const taskId = Math.floor(Date.now() / 1000);
 
 let getDir = (filename = '') =>
-  path.resolve(__dirname, `../../record_${taskId}/${roomId}/${ts}/${filename}`);
+  path.resolve(
+    __dirname,
+    `../../record_${taskId}/${ctx.roomId}/${ctx.ts}/${filename}`
+  );
 
 async function init(checkStatus = true) {
   // 初始化前需停止 loader & 创建新文件夹
-  ts = Math.floor(Date.now() / 1000);
+  ctx.ts = Math.floor(Date.now() / 1000);
 
   // mkdir
   fs.mkdirSync(getDir(), { recursive: true });
 
   if (checkStatus) {
-    const { room_info } = await getInfoByRoom(roomId);
+    const { room_info } = await getInfoByRoom(ctx.roomId);
 
     // 防止启动时已经在直播
     if (room_info.live_status === 1) {
@@ -32,13 +38,12 @@ async function init(checkStatus = true) {
 }
 
 let loaderInterval;
-let lockerFetch;
 
 // flv loader
 async function loader() {
-  if (lockerFetch) return;
+  if (ctx.lockerFetch) return;
 
-  const { room_info, anchor_info } = await getInfoByRoom(roomId);
+  const { room_info, anchor_info } = await getInfoByRoom(ctx.roomId);
 
   const info = {
     // live_status 0闲置 1直播 2轮播
@@ -53,32 +58,32 @@ async function loader() {
     .then(async (res) => {
       if (res.ok) {
         if (loaderInterval && !loaderInterval._destroyed) {
-          console.log(`${roomId}: clear loader Interval`);
+          console.log(`${ctx.roomId}: clear loader Interval`);
           clearInterval(loaderInterval);
         }
 
         // 重新初始化目录
         await init(false);
 
-        console.log(`${roomId}: ${ts} fetching.`);
+        console.log(`${ctx.roomId}: ${ctx.ts} fetching.`);
 
         // 防止由于 LIVE 的下发导致重复 fetch
-        lockerFetch = true;
+        ctx.lockerFetch = true;
 
         // write into room_info.json
         fs.writeFileSync(getDir('room_info.json'), JSON.stringify(room_info));
 
-        let filename = path.basename(new URL(res.url).pathname, '.flv');
-        let writer = fs.createWriteStream(getDir(`${filename}.flv`));
+        const filename = path.basename(new URL(res.url).pathname, '.flv');
+        const writer = fs.createWriteStream(getDir(`${filename}.flv`));
 
         // res.body is a Node.js Readable stream
-        let reader = res.body;
+        const reader = res.body;
         reader.pipe(writer);
 
         reader.on('end', () => {
-          console.log(`${roomId}: ${ts} fetch end.`);
+          console.log(`${ctx.roomId}: ${ctx.ts} fetch end.`);
 
-          lockerFetch = false;
+          ctx.lockerFetch = false;
 
           // 防止因网络波动而 end 的情况
           loader();
@@ -86,7 +91,7 @@ async function loader() {
       } else {
         if (!loaderInterval || loaderInterval._destroyed) {
           // 停止推流后，但没有下播
-          console.log(`${roomId}: ${ts} loader Interval`);
+          console.log(`${ctx.roomId}: ${ctx.ts} loader Interval`);
 
           loaderInterval = setInterval(function () {
             loader();
@@ -95,9 +100,9 @@ async function loader() {
       }
     })
     .catch((e) => {
-      console.log(`${roomId}: ${ts} fetch catch error.`, e);
+      console.log(`${ctx.roomId}: ${ctx.ts} fetch catch error.`, e);
 
-      lockerFetch = false;
+      ctx.lockerFetch = false;
 
       if (!loaderInterval || loaderInterval._destroyed) {
         loaderInterval = setInterval(function () {
@@ -109,7 +114,7 @@ async function loader() {
 
 // app
 module.exports = async function (shortId) {
-  roomId = shortId;
+  ctx.roomId = shortId;
 
   // 初始化
   const { room_id } = await init();
@@ -147,10 +152,10 @@ module.exports = async function (shortId) {
             break;
           case 'PREPARING':
             // 闲置（下播）
-            lockerFetch = false;
+            ctx.lockerFetch = false;
 
             if (loaderInterval && !loaderInterval._destroyed) {
-              console.log(`${roomId}: PREPARING clear Interval`);
+              console.log(`${ctx.roomId}: PREPARING clear Interval`);
               clearInterval(loaderInterval);
             }
 
