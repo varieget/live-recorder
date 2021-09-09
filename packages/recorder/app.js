@@ -126,7 +126,7 @@ module.exports = async function (shortId) {
       const { op, body, ts } = msgBody;
 
       // msgBody
-      if (ts - (lastMsgBody?.ts || ts) <= 30) {
+      if (ts - (lastMsgBody?.ts || ts) <= 70) {
         fs.appendFileSync(pwd() + '/sub.json', `${JSON.stringify(msgBody)}\n`);
       } else {
         await init();
