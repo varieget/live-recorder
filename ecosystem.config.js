@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'recorder',
-      script: './packages/recorder/index.js',
+      script: './src/index.js',
     },
   ],
 };
