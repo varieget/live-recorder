@@ -1,15 +1,18 @@
 {
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "recorder",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
   "scripts": {
-    "start": "node packages/recorder",
-    "pm2": "pm2 start packages/recorder",
+    "pm2": "pm2 start",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
     "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "devDependencies": {
     "prettier": "^2.2.1"
+  },
+  "dependencies": {
+    "bilibili-ws-client": "^1.0.0",
+    "node-fetch": "~2.6.7"
   }
 }

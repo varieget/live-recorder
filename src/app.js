@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const fetchFlv = require('./fetch-flv');
-const Client = require('sub-client');
+const Client = require('bilibili-ws-client');
 const { getInfoByRoom } = require('./get-info');
 
 let ctx = {
@@ -13,7 +13,7 @@ let ctx = {
 const taskId = 'record_' + Math.floor(Date.now() / 1000);
 
 const pwd = () =>
-  path.resolve(__dirname, `../../${taskId}/${ctx.roomId}/${ctx.ts}`);
+  path.resolve(__dirname, `../${taskId}/${ctx.roomId}/${ctx.ts}`);
 
 async function init(checkStatus = true) {
   // 初始化前需停止 loader 再创建新文件夹
