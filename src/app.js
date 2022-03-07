@@ -118,49 +118,51 @@ module.exports = async function (shortId) {
 
   let lastMsgBody;
 
-  new Client({
-    roomId: room_id, // 真实 roomId
-    log: (...rest) => console.log(room_id, '=>', ...rest),
-    // Client callback
-    notify: async (msgBody) => {
-      const { op, body, ts } = msgBody;
+  // 真实 roomId
+  const sub = new Client(room_id);
 
-      // msgBody
-      if (ts - (lastMsgBody?.ts || ts) <= 70) {
-        fs.appendFileSync(pwd() + '/sub.json', `${JSON.stringify(msgBody)}\n`);
-      } else {
-        await init();
+  sub.on('message', async (msgBody) => {
+    const { op, body, ts } = msgBody;
+
+    // msgBody
+    if (ts - (lastMsgBody?.ts || ts) <= 70) {
+      fs.appendFileSync(pwd() + '/sub.json', `${JSON.stringify(msgBody)}\n`);
+    } else {
+      await init();
+    }
+
+    lastMsgBody = msgBody;
+
+    if (op === 3) {
+      // 通过在线人数判断是否开播
+      // 防止未收到 LIVE cmd
+      if (body > 1) {
+        loader();
       }
-
-      lastMsgBody = msgBody;
-
-      if (op === 3) {
-        // 通过在线人数判断是否开播
-        // 防止未收到 LIVE cmd
-        if (body > 1) {
+    } else if (op === 5) {
+      switch (body.cmd) {
+        case 'LIVE':
+          // 开播 可以获取直播流
+          // 切换 码率kbps 帧率fps 也会触发 LIVE
           loader();
-        }
-      } else if (op === 5) {
-        switch (body.cmd) {
-          case 'LIVE':
-            // 开播 可以获取直播流
-            // 切换 码率kbps 帧率fps 也会触发 LIVE
-            loader();
-            break;
-          case 'PREPARING':
-            // 闲置（下播）
-            ctx.lockerFetch = false;
+          break;
+        case 'PREPARING':
+          // 闲置（下播）
+          ctx.lockerFetch = false;
 
-            if (loaderInterval && !loaderInterval._destroyed) {
-              console.log(`${ctx.roomId}: PREPARING clear Interval`);
-              clearInterval(loaderInterval);
-            }
+          if (loaderInterval && !loaderInterval._destroyed) {
+            console.log(`${ctx.roomId}: PREPARING clear Interval`);
+            clearInterval(loaderInterval);
+          }
 
-            break;
-          default:
-            break;
-        }
+          break;
+        default:
+          break;
       }
-    },
+    }
+  });
+
+  sub.on('error', (err) => {
+    throw new Error(err);
   });
 };

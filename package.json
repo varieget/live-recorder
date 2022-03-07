@@ -12,7 +12,7 @@
     "prettier": "^2.2.1"
   },
   "dependencies": {
-    "bilibili-ws-client": "^1.0.0",
+    "bilibili-ws-client": "^2.0.0",
     "node-fetch": "~2.6.7"
   }
 }

@@ -2,11 +2,24 @@
 # yarn lockfile v1
 
 
-bilibili-ws-client@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/bilibili-ws-client/-/bilibili-ws-client-1.0.0.tgz#7089571a3413de6222efe11e00aed3685fbcddd3"
-  integrity sha512-ZMpIPuCw/iZexOZFlt4nXeb2ZyYg9WpCXLOOAii9S++3VxB+me0GdtqrZs8BLDsUU7Cb3MEj6bDZ4rKNoSUr4A==
+"@types/node@*":
+  version "17.0.23"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.23.tgz#3b41a6e643589ac6442bdbd7a4a3ded62f33f7da"
+  integrity sha512-UxDxWn7dl97rKVeVS61vErvw086aCYhDLyvRQZ5Rk65rZKepaFdm53GeqXaKBuOhED4e9uWq34IC3TdSdJJ2Gw==
+
+"@types/ws@^8.5.3":
+  version "8.5.3"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.3.tgz#7d25a1ffbecd3c4f2d35068d0b283c037003274d"
+  integrity sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==
   dependencies:
+    "@types/node" "*"
+
+bilibili-ws-client@^2.0.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/bilibili-ws-client/-/bilibili-ws-client-2.1.2.tgz#ae834d1c8a91a2738d4cb5d22fad9c88e98dddd8"
+  integrity sha512-TF1dSIlHw4Wdlc8XxsX28dRUhhAwkubQSmQzuyhN+A+a/FD/7iwMvmp6iWN1NlMJOM7lwXF6zeIZ6nLRCftZ6A==
+  dependencies:
+    "@types/ws" "^8.5.3"
     ws "^8.5.0"
 
 node-fetch@~2.6.7:
@@ -17,9 +30,9 @@ node-fetch@~2.6.7:
     whatwg-url "^5.0.0"
 
 prettier@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.2.1.tgz#795a1a78dd52f073da0cd42b21f9c91381923ff5"
-  integrity sha512-PqyhM2yCjg/oKkFPtTGUojv7gnZAoG80ttl45O6x2Ug/rMJw4wcc9k6aaf2hibP7BGVCCM33gZoGjyvt9mm16Q==
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.6.1.tgz#d472797e0d7461605c1609808e27b80c0f9cfe17"
+  integrity sha512-8UVbTBYGwN37Bs9LERmxCPjdvPxlEowx2urIL6urHzdb3SDq4B/Z6xLFCblrSnE4iKWcS6ziJ3aOYrc1kz/E2A==
 
 tr46@~0.0.3:
   version "0.0.3"
