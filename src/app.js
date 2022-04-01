@@ -122,7 +122,11 @@ module.exports = async function (shortId) {
   const sub = new Client(room_id);
 
   sub.on('message', async (msgBody) => {
-    const { op, body, ts } = msgBody;
+    const { op, cmd, body, ts } = msgBody;
+
+    if (typeof body === 'string') {
+      msgBody.body = JSON.parse(body);
+    }
 
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
@@ -140,7 +144,7 @@ module.exports = async function (shortId) {
         loader();
       }
     } else if (op === 5) {
-      switch (body.cmd) {
+      switch (cmd) {
         case 'LIVE':
           // 开播 可以获取直播流
           // 切换 码率kbps 帧率fps 也会触发 LIVE
