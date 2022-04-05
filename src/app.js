@@ -23,8 +23,12 @@ const pwd = () =>
     `../record_${ts}/${ctx.roomId}/${ctx.ts}`
   );
 
-function mkdir() {
+function mkdir(newTask = false) {
   if (ctx.fetching) return;
+
+  if (newTask) {
+    ts = getTimestamp();
+  }
 
   ctx.ts = Math.floor(Date.now() / 1000);
 
@@ -141,6 +145,10 @@ export default async function (shortId) {
 
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
+      if (!ctx.fetching && ts - ctx.ts > 3600) {
+        mkdir(true);
+      }
+
       fs.appendFileSync(
         path.resolve(pwd(), 'sub.json'),
         `${JSON.stringify(msgBody)}\n`
