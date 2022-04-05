@@ -1,11 +1,11 @@
-const fetch = require('node-fetch');
-const { getPlayUrl } = require('./get-info');
+import fetch, { Headers } from 'node-fetch';
+import { getPlayUrl } from './get-info.js';
 
-module.exports = async function (roomId) {
+export default async function (roomId) {
   let playUrl = await getPlayUrl(roomId);
   let sourceURL = playUrl.durl[0].url;
 
-  let headers = new fetch.Headers({
+  let headers = new Headers({
     // (res.status === 475) means without Referer
     Referer: `https://live.bilibili.com/${roomId}`,
   });
@@ -19,4 +19,4 @@ module.exports = async function (roomId) {
     cache: 'default',
     referrerPolicy: 'no-referrer-when-downgrade',
   });
-};
+}

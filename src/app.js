@@ -1,116 +1,127 @@
-const fs = require('fs');
-const path = require('path');
-const fetchFlv = require('./fetch-flv');
-const Client = require('bilibili-ws-client');
-const { getInfoByRoom } = require('./get-info');
+import * as fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import Client from 'bilibili-ws-client';
+
+import fetchFlv from './fetch-flv.js';
+import { getInfoByRoom } from './get-info.js';
+
+const getTimestamp = () => Math.floor(Date.now() / 1000);
+
+let ts = getTimestamp();
 
 let ctx = {
   roomId: null, // shortId
-  ts: Math.floor(Date.now() / 1000), // 开始时间戳
-  lockerFetch: false,
+  ts, // 开始时间戳
+  fetching: false,
 };
 
-const taskId = 'record_' + Math.floor(Date.now() / 1000);
-
 const pwd = () =>
-  path.resolve(__dirname, `../${taskId}/${ctx.roomId}/${ctx.ts}`);
+  path.resolve(
+    path.dirname(fileURLToPath(new URL('', import.meta.url))),
+    `../record_${ts}/${ctx.roomId}/${ctx.ts}`
+  );
 
-async function init(checkStatus = true) {
-  // 初始化前需停止 loader 再创建新文件夹
+function mkdir() {
+  if (ctx.fetching) return;
+
   ctx.ts = Math.floor(Date.now() / 1000);
 
   // mkdir
   fs.mkdirSync(pwd(), { recursive: true });
+}
 
-  if (checkStatus) {
-    const { room_info } = await getInfoByRoom(ctx.roomId);
+async function init() {
+  // 初始化前需停止 fetching 再创建新文件夹
+  if (ctx.fetching) return;
 
-    // 防止启动时已经在直播
-    if (room_info.live_status === 1) {
-      loader();
-    }
+  mkdir();
 
-    return room_info;
+  const { room_info } = await getInfoByRoom(ctx.roomId);
+
+  // 防止启动时已经在直播
+  if (room_info.live_status === 1) {
+    loader();
   }
+
+  return room_info;
 }
 
 let loaderInterval;
 
 // flv loader
 async function loader() {
-  if (ctx.lockerFetch) return;
+  if (ctx.fetching) return;
 
   const { room_info, anchor_info } = await getInfoByRoom(ctx.roomId);
 
-  const info = {
-    // live_status 0闲置 1直播 2轮播
-    liveStatus: room_info.live_status === 1,
-    room_id: room_info.room_id, // 真实 roomId
-  };
+  // live_status 0闲置 1直播 2轮播
+  if (room_info.live_status !== 1) {
+    // 未开播时 或 已经在 fetchFlv
+    return;
+  }
 
-  // 未开播时 或 已经在 fetchFlv
-  if (!info.liveStatus) return;
+  try {
+    const res = await fetchFlv(room_info.room_id); // 真实 roomId
 
-  fetchFlv(info.room_id)
-    .then(async (res) => {
-      if (res.ok) {
-        if (loaderInterval && !loaderInterval._destroyed) {
-          console.log(`${ctx.roomId}: clear loader Interval`);
-          clearInterval(loaderInterval);
-        }
-
-        // 重新初始化目录
-        await init(false);
-
-        console.log(`${ctx.roomId}: ${ctx.ts} fetching.`);
-
-        // 防止由于 LIVE 的下发导致重复 fetch
-        ctx.lockerFetch = true;
-
-        // write into room_info.json
-        fs.writeFileSync(pwd() + '/room_info.json', JSON.stringify(room_info));
-
-        const filename = path.basename(new URL(res.url).pathname, '.flv');
-        const writer = fs.createWriteStream(pwd() + `/${filename}.flv`);
-
-        // res.body is a Node.js Readable stream
-        const reader = res.body;
-        reader.pipe(writer);
-
-        reader.on('end', () => {
-          console.log(`${ctx.roomId}: ${ctx.ts} fetch end.`);
-
-          ctx.lockerFetch = false;
-
-          // 防止因网络波动而 end 的情况
-          loader();
-        });
-      } else {
-        if (!loaderInterval || loaderInterval._destroyed) {
-          // 停止推流后，但没有下播
-          console.log(`${ctx.roomId}: ${ctx.ts} loader Interval`);
-
-          loaderInterval = setInterval(function () {
-            loader();
-          }, 10 * 1000);
-        }
+    if (res.ok) {
+      if (loaderInterval && !loaderInterval._destroyed) {
+        console.log(`${ctx.roomId}: clear loader Interval`);
+        clearInterval(loaderInterval);
       }
-    })
-    .catch((e) => {
-      console.log(`${ctx.roomId}: ${ctx.ts} fetch catch error.`, e);
 
-      ctx.lockerFetch = false;
+      // 重新初始化目录
+      mkdir();
 
+      console.log(`${ctx.roomId}: ${ctx.ts} fetching.`);
+
+      // 防止由于 LIVE 的多次下发导致重复 fetch
+      ctx.fetching = true;
+
+      // write into room_info.json
+      fs.writeFileSync(pwd() + '/room_info.json', JSON.stringify(room_info));
+
+      const filename = path.basename(new URL(res.url).pathname, '.flv');
+      const writer = fs.createWriteStream(pwd() + `/${filename}.flv`);
+
+      // res.body is a Node.js Readable stream
+      const reader = res.body;
+      reader.pipe(writer);
+
+      reader.on('end', () => {
+        console.log(`${ctx.roomId}: ${ctx.ts} fetch end.`);
+
+        ctx.fetching = false;
+
+        // 防止因网络波动而 end 的情况
+        loader();
+      });
+    } else {
       if (!loaderInterval || loaderInterval._destroyed) {
+        // 停止推流后，但没有下播
+        console.log(`${ctx.roomId}: ${ctx.ts} loader Interval`);
+
         loaderInterval = setInterval(function () {
           loader();
         }, 10 * 1000);
       }
-    });
+    }
+  } catch (e) {
+    console.log(`${ctx.roomId}: ${ctx.ts} fetch catch error.`, e);
+
+    ctx.fetching = false;
+
+    if (!loaderInterval || loaderInterval._destroyed) {
+      loaderInterval = setInterval(function () {
+        loader();
+      }, 10 * 1000);
+    }
+  }
 }
 
 // app
-module.exports = async function (shortId) {
+export default async function (shortId) {
   ctx.roomId = shortId;
 
   // 初始化
@@ -130,7 +141,10 @@ module.exports = async function (shortId) {
 
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
-      fs.appendFileSync(pwd() + '/sub.json', `${JSON.stringify(msgBody)}\n`);
+      fs.appendFileSync(
+        path.resolve(pwd(), 'sub.json'),
+        `${JSON.stringify(msgBody)}\n`
+      );
     } else {
       await init();
     }
@@ -152,7 +166,7 @@ module.exports = async function (shortId) {
           break;
         case 'PREPARING':
           // 闲置（下播）
-          ctx.lockerFetch = false;
+          ctx.fetching = false;
 
           if (loaderInterval && !loaderInterval._destroyed) {
             console.log(`${ctx.roomId}: PREPARING clear Interval`);
@@ -169,4 +183,4 @@ module.exports = async function (shortId) {
   sub.on('error', (err) => {
     throw new Error(err);
   });
-};
+}

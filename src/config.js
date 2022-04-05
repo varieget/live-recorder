@@ -1,4 +1,4 @@
 // roomId 短位号
-module.exports = [
+export default [
   1, // 哔哩哔哩直播
 ];

@@ -2,6 +2,7 @@
   "name": "recorder",
   "version": "1.0.0",
   "main": "src/index.js",
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write \"src/**/*.{js,json,md}\"",
