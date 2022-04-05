@@ -4,15 +4,14 @@
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
-    "pm2": "pm2 start",
-    "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
-    "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
+    "prettier": "prettier --write \"src/**/*.{js,json,md}\"",
+    "prettier:check": "prettier --check \"src/**/*.{js,json,md}\""
   },
   "devDependencies": {
-    "prettier": "^2.2.1"
+    "prettier": "^2.6.2"
   },
   "dependencies": {
     "bilibili-ws-client": "^2.0.0",
-    "node-fetch": "~2.6.7"
+    "node-fetch": "^3.2.3"
   }
 }
