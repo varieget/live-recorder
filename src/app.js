@@ -15,6 +15,7 @@ let ctx = {
   roomId: null, // shortId
   ts, // 开始时间戳
   fetching: false,
+  filename: '',
 };
 
 const pwd = () =>
@@ -84,10 +85,15 @@ async function loader() {
       ctx.fetching = true;
 
       // write into room_info.json
-      fs.writeFileSync(pwd() + '/room_info.json', JSON.stringify(room_info));
+      fs.writeFileSync(
+        path.resolve(pwd(), 'room_info.json'),
+        JSON.stringify(room_info)
+      );
 
       const filename = path.basename(new URL(res.url).pathname, '.flv');
-      const writer = fs.createWriteStream(pwd() + `/${filename}.flv`);
+      ctx.filename = filename + '.flv';
+
+      const writer = fs.createWriteStream(path.resolve(pwd(), ctx.filename));
 
       // res.body is a Node.js Readable stream
       const reader = res.body;
@@ -145,8 +151,16 @@ export default async function (shortId) {
 
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
-      if (!ctx.fetching && ts - ctx.ts > 3600) {
-        mkdir(true);
+      if (op === 3 && !ctx.fetching && ts - ctx.ts > 3600) {
+        // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
+        const mtime = Math.floor(
+          fs.statSync(path.resolve(pwd(), ctx.filename)).mtimeMs / 1000
+        );
+
+        if (ts > mtime + 60 * 5) {
+          // 收到心跳的时间戳大于 flv 文件最后修改时间 60 * 5 秒
+          mkdir(true);
+        }
       }
 
       fs.appendFileSync(
