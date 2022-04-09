@@ -152,14 +152,16 @@ export default async function (shortId) {
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
       if (op === 3 && !ctx.fetching && ts - ctx.ts > 3600) {
-        // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
-        const mtime = Math.floor(
-          fs.statSync(path.resolve(pwd(), ctx.filename)).mtimeMs / 1000
-        );
+        const filename = path.resolve(pwd(), ctx.filename);
 
-        if (ts > mtime + 60 * 5) {
-          // 收到心跳的时间戳大于 flv 文件最后修改时间 60 * 5 秒
-          mkdir(true);
+        if (fs.existsSync(filename)) {
+          // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
+          const mtime = Math.floor(fs.statSync(filename).mtimeMs / 1000);
+
+          if (ts > mtime + 60 * 5) {
+            // 收到心跳的时间戳大于 flv 文件最后修改时间 60 * 5 秒
+            mkdir(true);
+          }
         }
       }
 
