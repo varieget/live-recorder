@@ -3,10 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const pwd = (...pathSegments) =>
-  path.resolve(
-    path.dirname(fileURLToPath(new URL('', import.meta.url))),
-    ...pathSegments
-  );
+  path.resolve(path.dirname(fileURLToPath(import.meta.url)), ...pathSegments);
 
 const flvPath = [];
 

@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,7 +20,7 @@ let ctx = {
 
 const pwd = () =>
   path.resolve(
-    path.dirname(fileURLToPath(new URL('', import.meta.url))),
+    path.dirname(fileURLToPath(import.meta.url)),
     `../record_${ts}/${ctx.roomId}/${ctx.ts}`
   );
 
