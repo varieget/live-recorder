@@ -1,8 +1,8 @@
 import cluster from 'node:cluster';
 import process from 'node:process';
 
-import app from './app.js';
-import config from './config.js';
+import app from './app';
+import { config } from './config';
 
 if (cluster.isPrimary) {
   config.forEach((roomId) => {
@@ -15,7 +15,7 @@ if (cluster.isPrimary) {
     }, 1000);
   });
 } else if (cluster.isWorker) {
-  process.on('message', async (roomId) => {
+  process.on('message', async (roomId: number) => {
     await app(roomId);
   });
 }

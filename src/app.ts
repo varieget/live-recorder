@@ -1,28 +1,30 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import Client from 'bilibili-ws-client';
 
-import fetchFlv from './fetch-flv.js';
-import { getInfoByRoom } from './get-info.js';
+import fetchFlv from './fetch-flv';
+import { getInfoByRoom } from './get-info';
 
 const getTimestamp = () => Math.floor(Date.now() / 1000);
 
 let ts = getTimestamp();
 
-let ctx = {
-  roomId: null, // shortId
+type Context = {
+  roomId: number; // shortId
+  ts: number; // 开始时间戳
+  fetching: boolean;
+  filename: string;
+};
+
+let ctx: Context = {
+  roomId: 1, // shortId
   ts, // 开始时间戳
   fetching: false,
   filename: '',
 };
 
 const pwd = () =>
-  path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    `../record_${ts}/${ctx.roomId}/${ctx.ts}`
-  );
+  path.resolve(__dirname, `../record_${ts}/${ctx.roomId}/${ctx.ts}`);
 
 function mkdir(newTask = false) {
   if (ctx.fetching) return;
@@ -53,7 +55,8 @@ async function init() {
   return room_info;
 }
 
-let loaderInterval;
+// let loaderInterval: NodeJS.Timer;
+let loaderInterval: any; // TODO
 
 // flv loader
 async function loader() {
@@ -97,9 +100,9 @@ async function loader() {
 
       // res.body is a Node.js Readable stream
       const reader = res.body;
-      reader.pipe(writer);
+      reader?.pipe(writer);
 
-      reader.on('end', () => {
+      reader?.on('end', () => {
         console.log(`${ctx.roomId}: ${ctx.ts} fetch end.`);
 
         ctx.fetching = false;
@@ -131,13 +134,13 @@ async function loader() {
 }
 
 // app
-export default async function (shortId) {
+export default async function (shortId: number) {
   ctx.roomId = shortId;
 
   // 初始化
   const { room_id } = await init();
 
-  let lastMsgBody;
+  let lastMsgBody: any;
 
   // 真实 roomId
   const sub = new Client(room_id);
@@ -205,6 +208,6 @@ export default async function (shortId) {
   });
 
   sub.on('error', (err) => {
-    throw new Error(err);
+    throw err;
   });
 }

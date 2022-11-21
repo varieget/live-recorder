@@ -1,7 +1,14 @@
 import querystring from 'node:querystring';
 import fetch from 'node-fetch';
 
-export const getInfoByRoom = async (roomId) => {
+type Result<T> = {
+  code: number;
+  message: string;
+  ttl: number;
+  data: T;
+};
+
+export const getInfoByRoom = async (roomId: number) => {
   // https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=8592153
 
   try {
@@ -10,7 +17,7 @@ export const getInfoByRoom = async (roomId) => {
     );
 
     if (res.ok) {
-      let { data } = await res.json();
+      let { data } = (await res.json()) as Result<any>;
 
       return data;
     } else {
@@ -23,7 +30,7 @@ export const getInfoByRoom = async (roomId) => {
   }
 };
 
-export const getPlayUrl = async (roomId) => {
+export const getPlayUrl = async (roomId: number) => {
   // https://api.live.bilibili.com/room/v1/Room/playUrl?cid=8592153&quality=4&platform=web
 
   let cid = roomId;
@@ -42,7 +49,7 @@ export const getPlayUrl = async (roomId) => {
     );
 
     if (res.ok) {
-      let { data } = await res.json();
+      let { data } = (await res.json()) as Result<any>;
 
       return data;
     } else {

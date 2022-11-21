@@ -1,7 +1,7 @@
 import fetch, { Headers } from 'node-fetch';
-import { getPlayUrl } from './get-info.js';
+import { getPlayUrl } from './get-info';
 
-export default async function (roomId) {
+export default async function (roomId: number) {
   let playUrl = await getPlayUrl(roomId);
   let sourceURL = playUrl.durl[0].url;
 
@@ -15,8 +15,8 @@ export default async function (roomId) {
   return fetch(sourceURL, {
     method: 'GET',
     headers,
-    mode: 'cors',
-    cache: 'default',
+    // mode: 'cors',
+    // cache: 'default',
     referrerPolicy: 'no-referrer-when-downgrade',
   });
 }

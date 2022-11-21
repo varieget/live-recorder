@@ -1,18 +1,22 @@
 {
   "name": "recorder",
   "version": "1.0.0",
-  "main": "src/index.js",
-  "type": "module",
+  "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
-    "prettier": "prettier --write \"src/**/*.{js,json,md}\"",
-    "prettier:check": "prettier --check \"src/**/*.{js,json,md}\""
+    "prettier": "prettier --write \"src/**/*.{js,ts,json,md}\"",
+    "prettier:check": "prettier --check \"src/**/*.{js,ts,json,md}\"",
+    "start": "ts-node .",
+    "clear": "ts-node bin/clear.ts"
   },
   "devDependencies": {
-    "prettier": "^2.6.2"
+    "@types/node": "^16.18.3",
+    "prettier": "^2.6.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
   },
   "dependencies": {
     "bilibili-ws-client": "^2.0.0",
-    "node-fetch": "^3.2.3"
+    "node-fetch": "2.6.7"
   }
 }
