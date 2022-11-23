@@ -17,6 +17,6 @@ export default async function (roomId: number) {
     headers,
     // mode: 'cors',
     // cache: 'default',
-    referrerPolicy: 'no-referrer-when-downgrade',
+    // referrerPolicy: 'no-referrer-when-downgrade',
   });
 }
