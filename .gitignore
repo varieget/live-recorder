@@ -3,6 +3,7 @@ node_modules/
 
 # production
 /record*/
+/.*rc.yaml
 
 # misc
 .DS_Store

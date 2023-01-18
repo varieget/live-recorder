@@ -10,14 +10,15 @@
     "clear": "ts-node bin/clear.ts"
   },
   "devDependencies": {
-    "@types/node": "^16.18.3",
+    "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
-    "prettier": "^2.6.2",
+    "prettier": "^2.8.3",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.4"
   },
   "dependencies": {
-    "bilibili-ws-client": "^2.0.0",
-    "node-fetch": "2.6.7"
+    "bilibili-ws-client": "^2.2.0",
+    "cosmiconfig": "^8.0.0",
+    "node-fetch": "^2.6.7"
   }
 }
