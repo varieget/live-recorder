@@ -55,8 +55,7 @@ async function init() {
   return room_info;
 }
 
-// let loaderInterval: NodeJS.Timer;
-let loaderInterval: any; // TODO
+let timer: NodeJS.Timer | null;
 
 // flv loader
 async function loader() {
@@ -74,9 +73,10 @@ async function loader() {
     const res = await fetchFlv(room_info.room_id); // 真实 roomId
 
     if (res.ok) {
-      if (loaderInterval && !loaderInterval._destroyed) {
+      if (timer) {
         console.log(`${ctx.roomId}: clear loader Interval`);
-        clearInterval(loaderInterval);
+        clearInterval(timer);
+        timer = null;
       }
 
       // 重新初始化目录
@@ -111,11 +111,11 @@ async function loader() {
         loader();
       });
     } else {
-      if (!loaderInterval || loaderInterval._destroyed) {
+      if (!timer) {
         // 停止推流后，但没有下播
         console.log(`${ctx.roomId}: ${ctx.ts} loader Interval`);
 
-        loaderInterval = setInterval(function () {
+        timer = setInterval(function () {
           loader();
         }, 10 * 1000);
       }
@@ -125,8 +125,8 @@ async function loader() {
 
     ctx.fetching = false;
 
-    if (!loaderInterval || loaderInterval._destroyed) {
-      loaderInterval = setInterval(function () {
+    if (!timer) {
+      timer = setInterval(function () {
         loader();
       }, 10 * 1000);
     }
@@ -181,7 +181,7 @@ export default async function (shortId: number) {
     if (op === 3) {
       // 通过在线人数判断是否开播
       // 防止未收到 LIVE cmd
-      if (body > 1) {
+      if (+body > 1) {
         loader();
       }
     } else if (op === 5) {
@@ -195,9 +195,10 @@ export default async function (shortId: number) {
           // 闲置（下播）
           ctx.fetching = false;
 
-          if (loaderInterval && !loaderInterval._destroyed) {
+          if (timer) {
             console.log(`${ctx.roomId}: PREPARING clear Interval`);
-            clearInterval(loaderInterval);
+            clearInterval(timer);
+            timer = null;
           }
 
           break;
