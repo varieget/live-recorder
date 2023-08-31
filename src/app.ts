@@ -143,7 +143,15 @@ export default async function (shortId: number) {
   let lastMsgBody: any;
 
   // 真实 roomId
-  const sub = new Client(room_id);
+  const sub = new Client({
+    uid: room_id, // 留空或为 0 代表访客，无法显示弹幕发送用户
+    roomid: room_id,
+    protover: 3,
+    // buvid: '',
+    platform: 'web',
+    type: 2,
+    // key: '',
+  });
 
   sub.on('message', async (msgBody) => {
     const { op, cmd, body, ts } = msgBody;
@@ -179,11 +187,9 @@ export default async function (shortId: number) {
     lastMsgBody = msgBody;
 
     if (op === 3) {
-      // 通过在线人数判断是否开播
+      // 收到心跳判断是否开播，2023-08-30 起 body 恒定为 1
       // 防止未收到 LIVE cmd
-      if (+body > 1) {
-        loader();
-      }
+      loader();
     } else if (op === 5) {
       switch (cmd) {
         case 'LIVE':
