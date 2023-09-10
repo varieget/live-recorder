@@ -45,7 +45,23 @@ async function init() {
 
   mkdir();
 
-  const { room_info } = await getInfoByRoom(ctx.roomId);
+  let room_info;
+  try {
+    ({ room_info } = await getInfoByRoom(ctx.roomId));
+  } catch (e) {
+    console.error(
+      '[%s] %s: %s init getInfoByRoom catch error.',
+      new Date().toLocaleString(),
+      ctx.roomId,
+      ctx.ts
+    );
+
+    // sleep 10s
+    await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+    init();
+
+    return;
+  }
 
   // 防止启动时已经在直播
   if (room_info.live_status === 1) {
@@ -61,7 +77,25 @@ let timer: NodeJS.Timer | null;
 async function loader() {
   if (ctx.fetching) return;
 
-  const { room_info, anchor_info } = await getInfoByRoom(ctx.roomId);
+  let room_info;
+  try {
+    ({ room_info } = await getInfoByRoom(ctx.roomId));
+  } catch (e) {
+    console.error(
+      '[%s] %s: %s loader getInfoByRoom catch error.',
+      new Date().toLocaleString(),
+      ctx.roomId,
+      ctx.ts
+    );
+
+    if (!timer) {
+      timer = setInterval(function () {
+        loader();
+      }, 10 * 1000);
+    }
+
+    return;
+  }
 
   // live_status 0闲置 1直播 2轮播
   if (room_info.live_status !== 1) {
@@ -74,7 +108,12 @@ async function loader() {
 
     if (res.ok) {
       if (timer) {
-        console.log(`${ctx.roomId}: clear loader Interval`);
+        console.log(
+          `[%s] %s: %s clear loader Interval`,
+          new Date().toLocaleString(),
+          ctx.roomId,
+          ctx.ts
+        );
         clearInterval(timer);
         timer = null;
       }
@@ -82,7 +121,12 @@ async function loader() {
       // 重新初始化目录
       mkdir();
 
-      console.log(`${ctx.roomId}: ${ctx.ts} fetching.`);
+      console.log(
+        '[%s] %s: %s fetching.',
+        new Date().toLocaleString(),
+        ctx.roomId,
+        ctx.ts
+      );
 
       // 防止由于 LIVE 的多次下发导致重复 fetch
       ctx.fetching = true;
@@ -103,7 +147,12 @@ async function loader() {
       reader?.pipe(writer);
 
       reader?.on('end', () => {
-        console.log(`${ctx.roomId}: ${ctx.ts} fetch end.`);
+        console.log(
+          '[%s] %s: %s fetch end.',
+          new Date().toLocaleString(),
+          ctx.roomId,
+          ctx.ts
+        );
 
         ctx.fetching = false;
 
@@ -113,7 +162,12 @@ async function loader() {
     } else {
       if (!timer) {
         // 停止推流后，但没有下播
-        console.log(`${ctx.roomId}: ${ctx.ts} loader Interval`);
+        console.log(
+          '[%s] %s: %s loader Interval',
+          new Date().toLocaleString(),
+          ctx.roomId,
+          ctx.ts
+        );
 
         timer = setInterval(function () {
           loader();
@@ -121,7 +175,12 @@ async function loader() {
       }
     }
   } catch (e) {
-    console.log(`${ctx.roomId}: ${ctx.ts} fetch catch error.`, e);
+    console.error(
+      '[%s] %s: %s fetch catch error.',
+      new Date().toLocaleString(),
+      ctx.roomId,
+      ctx.ts
+    );
 
     ctx.fetching = false;
 
@@ -215,6 +274,11 @@ export default async function (shortId: number) {
   });
 
   sub.on('error', (err) => {
-    throw err;
+    console.error(
+      '[%s] %s: %s',
+      new Date().toLocaleString(),
+      err.name,
+      err.message
+    );
   });
 }

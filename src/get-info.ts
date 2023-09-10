@@ -11,21 +11,15 @@ type Result<T> = {
 export const getInfoByRoom = async (roomId: number) => {
   // https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=8592153
 
-  try {
-    let res = await fetch(
-      `https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=${roomId}`
-    );
+  let res = await fetch(
+    `https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=${roomId}`
+  );
 
-    if (res.ok) {
-      let { data } = (await res.json()) as Result<any>;
+  if (res.ok) {
+    let { data } = (await res.json()) as Result<any>;
 
-      return data;
-    } else {
-      return {};
-    }
-  } catch (e) {
-    console.error(e);
-
+    return data;
+  } else {
     return {};
   }
 };
@@ -41,23 +35,17 @@ export const getPlayUrl = async (roomId: number) => {
     platform: 'web',
   };
 
-  try {
-    let res = await fetch(
-      `https://api.live.bilibili.com/room/v1/Room/playUrl?${querystring.stringify(
-        params
-      )}`
-    );
+  let res = await fetch(
+    `https://api.live.bilibili.com/room/v1/Room/playUrl?${querystring.stringify(
+      params
+    )}`
+  );
 
-    if (res.ok) {
-      let { data } = (await res.json()) as Result<any>;
+  if (res.ok) {
+    let { data } = (await res.json()) as Result<any>;
 
-      return data;
-    } else {
-      return {};
-    }
-  } catch (e) {
-    console.error(e);
-
+    return data;
+  } else {
     return {};
   }
 };
