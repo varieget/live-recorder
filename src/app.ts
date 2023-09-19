@@ -261,9 +261,15 @@ export default async function (shortId: number) {
           ctx.fetching = false;
 
           if (timer) {
-            console.log(`${ctx.roomId}: PREPARING clear Interval`);
             clearInterval(timer);
             timer = null;
+
+            console.log(
+              '[%s] %s: %s PREPARING clear Interval',
+              new Date().toLocaleString(),
+              ctx.roomId,
+              ctx.ts
+            );
           }
 
           break;
