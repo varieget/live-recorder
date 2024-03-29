@@ -8,6 +8,36 @@ type Result<T> = {
   data: T;
 };
 
+export const getBuvid = async () => {
+  // https://api.bilibili.com/x/frontend/finger/spi
+
+  let res = await fetch('https://api.bilibili.com/x/frontend/finger/spi');
+
+  if (res.ok) {
+    let { data } = (await res.json()) as Result<any>;
+
+    return data;
+  } else {
+    return {};
+  }
+};
+
+export const getDanmuInfo = async (roomId: number) => {
+  // https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=1
+
+  let res = await fetch(
+    `https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomId}`
+  );
+
+  if (res.ok) {
+    let { data } = (await res.json()) as Result<any>;
+
+    return data;
+  } else {
+    return {};
+  }
+};
+
 export const getInfoByRoom = async (roomId: number) => {
   // https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=8592153
 

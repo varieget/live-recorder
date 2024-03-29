@@ -3,7 +3,7 @@ import path from 'node:path';
 import Client from 'bilibili-ws-client';
 
 import fetchFlv from './fetch-flv';
-import { getInfoByRoom } from './get-info';
+import { getBuvid, getDanmuInfo, getInfoByRoom } from './get-info';
 
 const getTimestamp = () => Math.floor(Date.now() / 1000);
 
@@ -45,12 +45,14 @@ async function init() {
 
   mkdir();
 
-  let room_info;
+  let b_3: string, room_info: any, token: string;
   try {
+    ({ b_3 } = await getBuvid());
     ({ room_info } = await getInfoByRoom(ctx.roomId));
+    ({ token } = await getDanmuInfo(room_info.room_id));
   } catch (e) {
     console.error(
-      '[%s] %s: %s init getInfoByRoom catch error.',
+      '[%s] %s: %s init catch error.',
       new Date().toLocaleString(),
       ctx.roomId,
       ctx.ts
@@ -68,7 +70,7 @@ async function init() {
     loader();
   }
 
-  return room_info;
+  return { b_3, room_info, token };
 }
 
 let timer: NodeJS.Timer | null;
@@ -197,19 +199,20 @@ export default async function (shortId: number) {
   ctx.roomId = shortId;
 
   // 初始化
-  const { room_id } = await init();
+  const { b_3, room_info, token } = (await init()) || {};
+  const { room_id } = room_info || {};
 
   let lastMsgBody: any;
 
   // 真实 roomId
   const sub = new Client({
-    uid: room_id, // 留空或为 0 代表访客，无法显示弹幕发送用户
+    uid: 0, // 留空或为 0 代表访客，无法显示弹幕发送用户
     roomid: room_id,
     protover: 3,
-    // buvid: '',
+    buvid: b_3 || '',
     platform: 'web',
     type: 2,
-    // key: '',
+    key: token,
   });
 
   sub.on('message', async (msgBody) => {
