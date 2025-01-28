@@ -73,7 +73,7 @@ async function init() {
   return { b_3, room_info, token };
 }
 
-let timer: NodeJS.Timer | null;
+let timer: NodeJS.Timeout | null;
 
 // flv loader
 async function loader() {

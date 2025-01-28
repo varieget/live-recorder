@@ -8,13 +8,12 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "NodeNext",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "isolatedModules": true,
     "baseUrl": "src"
   },
   "ts-node": {
-    "transpileOnly": true,
-    "esm": true
+    "transpileOnly": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]
