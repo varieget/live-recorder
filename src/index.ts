@@ -1,20 +1,24 @@
 import cluster from 'node:cluster';
 import process from 'node:process';
 
-import app from './app';
-import { config } from './config';
+import app from './app.ts';
+import { config } from './config.ts';
 
 if (cluster.isPrimary) {
   config.forEach((roomId) => {
-    let worker = cluster.fork();
+    const worker = cluster.fork();
 
     // See issues: #39854, #37782
     // See PR: #41221
-    setTimeout(() => {
-      worker.send(roomId);
-    }, 1000);
+    worker.on('message', (message) => {
+      if (message === 'success') {
+        worker.send(roomId);
+      }
+    });
   });
 } else if (cluster.isWorker) {
+  process.send?.('success');
+
   process.on('message', async (roomId: number) => {
     await app(roomId);
   });

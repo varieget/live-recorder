@@ -1,5 +1,5 @@
 import fetch, { Headers } from 'node-fetch';
-import { getPlayUrl } from './get-info';
+import { getPlayUrl } from './get-info.ts';
 
 export default async function (roomId: number) {
   let playUrl = await getPlayUrl(roomId);

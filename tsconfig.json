@@ -10,10 +10,9 @@
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "isolatedModules": true,
-    "baseUrl": "src"
-  },
-  "ts-node": {
-    "transpileOnly": true
+    "baseUrl": "src",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]

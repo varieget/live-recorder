@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Client from 'bilibili-ws-client';
 
-import fetchFlv from './fetch-flv';
-import { getBuvid, getDanmuInfo, getInfoByRoom } from './get-info';
+import fetchFlv from './fetch-flv.ts';
+import { getBuvid, getDanmuInfo, getInfoByRoom } from './get-info.ts';
 
 const getTimestamp = () => Math.floor(Date.now() / 1000);
 
