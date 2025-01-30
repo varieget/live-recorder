@@ -6,11 +6,9 @@ module.exports = {
   apps: [
     {
       name: 'recorder',
-      interpreter: resolveApp('node_modules/.bin/ts-node'),
+      interpreter: 'node',
+      interpreterArgs: '--import jiti/register',
       script: resolveApp('src/index.ts'),
-      env: {
-        TS_NODE_PROJECT: resolveApp('tsconfig.json'),
-      },
     },
   ],
 };

@@ -24,7 +24,7 @@ let ctx: Context = {
 };
 
 const pwd = () =>
-  path.resolve(__dirname, `../record_${ts}/${ctx.roomId}/${ctx.ts}`);
+  path.resolve(import.meta.dirname, `../record_${ts}/${ctx.roomId}/${ctx.ts}`);
 
 function mkdir(newTask = false) {
   if (ctx.fetching) return;

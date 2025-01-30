@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const pwd = (...paths: string[]) => path.resolve(__dirname, ...paths);
+const pwd = (...paths: string[]) => path.resolve(import.meta.dirname, ...paths);
 
 const flvPath: string[] = [];
 
