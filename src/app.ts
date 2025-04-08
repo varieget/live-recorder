@@ -3,7 +3,13 @@ import path from 'node:path';
 import Client from 'bilibili-ws-client';
 
 import fetchFlv from './fetch-flv.ts';
-import { getBuvid, getDanmuInfo, getInfoByRoom } from './get-info.ts';
+import {
+  getBuvid,
+  getDanmuInfo,
+  getInfoByRoom,
+  getWbiKeys,
+} from './get-info.ts';
+import WbiSign from './wbiSign.ts';
 
 const getTimestamp = () => Math.floor(Date.now() / 1000);
 
@@ -47,9 +53,12 @@ async function init() {
 
   let b_3: string, room_info: any, token: string;
   try {
+    const { img_key, sub_key } = await getWbiKeys();
+    const wbi = new WbiSign(img_key, sub_key);
+
     ({ b_3 } = await getBuvid());
-    ({ room_info } = await getInfoByRoom(ctx.roomId));
-    ({ token } = await getDanmuInfo(room_info.room_id));
+    ({ room_info } = await getInfoByRoom(ctx.roomId, wbi));
+    ({ token } = await getDanmuInfo(room_info.room_id, wbi));
   } catch (e) {
     console.error(
       '[%s] %s: %s init catch error.',
@@ -79,9 +88,12 @@ let timer: NodeJS.Timeout | null;
 async function loader() {
   if (ctx.fetching) return;
 
+  const { img_key, sub_key } = await getWbiKeys();
+  const wbi = new WbiSign(img_key, sub_key);
+
   let room_info;
   try {
-    ({ room_info } = await getInfoByRoom(ctx.roomId));
+    ({ room_info } = await getInfoByRoom(ctx.roomId, wbi));
   } catch (e) {
     console.error(
       '[%s] %s: %s loader getInfoByRoom catch error.',
@@ -106,7 +118,7 @@ async function loader() {
   }
 
   try {
-    const res = await fetchFlv(room_info.room_id); // 真实 roomId
+    const res = await fetchFlv(room_info.room_id, wbi); // 真实 roomId
 
     if (res.ok) {
       if (timer) {

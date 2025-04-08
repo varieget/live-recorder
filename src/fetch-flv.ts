@@ -1,8 +1,10 @@
 import fetch, { Headers } from 'node-fetch';
 import { getPlayUrl } from './get-info.ts';
 
-export default async function (roomId: number) {
-  let playUrl = await getPlayUrl(roomId);
+import type WbiSign from './wbiSign.ts';
+
+export default async function (roomId: number, wbi: WbiSign) {
+  let playUrl = await getPlayUrl(roomId, wbi);
   let sourceURL = playUrl.durl[0].url;
 
   let headers = new Headers({
