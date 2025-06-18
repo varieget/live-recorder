@@ -45,12 +45,11 @@ export const getWbiKeys = async () => {
 };
 
 export const getBuvid = async () => {
-  // https://api.bilibili.com/x/frontend/finger/spi
-
-  let res = await fetch('https://api.bilibili.com/x/frontend/finger/spi');
+  const res = await fetch('https://api.bilibili.com/x/frontend/finger/spi');
 
   if (res.ok) {
-    let { data } = (await res.json()) as Result<any>;
+    const { code, data } = (await res.json()) as Result<any>;
+    if (code !== 0) throw new Error();
 
     return data;
   } else {
@@ -59,7 +58,7 @@ export const getBuvid = async () => {
 };
 
 export const getDanmuInfo = async (roomId: number, wbi: WbiSign) => {
-  let res = await fetch(
+  const res = await fetch(
     wbi.sign(
       'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo',
       { id: '' + roomId, type: '0' }
@@ -68,7 +67,8 @@ export const getDanmuInfo = async (roomId: number, wbi: WbiSign) => {
   );
 
   if (res.ok) {
-    let { data } = (await res.json()) as Result<any>;
+    const { code, data } = (await res.json()) as Result<any>;
+    if (code !== 0) throw new Error();
 
     return data;
   } else {
@@ -77,7 +77,7 @@ export const getDanmuInfo = async (roomId: number, wbi: WbiSign) => {
 };
 
 export const getInfoByRoom = async (roomId: number, wbi: WbiSign) => {
-  let res = await fetch(
+  const res = await fetch(
     wbi.sign(
       'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
       { room_id: '' + roomId }
@@ -86,7 +86,8 @@ export const getInfoByRoom = async (roomId: number, wbi: WbiSign) => {
   );
 
   if (res.ok) {
-    let { data } = (await res.json()) as Result<any>;
+    const { code, data } = (await res.json()) as Result<any>;
+    if (code !== 0) throw new Error();
 
     return data;
   } else {
@@ -95,7 +96,7 @@ export const getInfoByRoom = async (roomId: number, wbi: WbiSign) => {
 };
 
 export const getPlayUrl = async (roomId: number, wbi: WbiSign) => {
-  let res = await fetch(
+  const res = await fetch(
     wbi.sign('https://api.live.bilibili.com/room/v1/Room/playUrl', {
       cid: '' + roomId,
       quality: '4',
@@ -105,7 +106,8 @@ export const getPlayUrl = async (roomId: number, wbi: WbiSign) => {
   );
 
   if (res.ok) {
-    let { data } = (await res.json()) as Result<any>;
+    const { code, data } = (await res.json()) as Result<any>;
+    if (code !== 0) throw new Error();
 
     return data;
   } else {

@@ -84,11 +84,16 @@ async function init() {
 
 let timer: NodeJS.Timeout | null;
 
+let img_key: string, sub_key: string;
+
 // flv loader
 async function loader() {
   if (ctx.fetching) return;
 
-  const { img_key, sub_key } = await getWbiKeys();
+  if (!img_key || !sub_key) {
+    ({ img_key = '', sub_key = '' } = await getWbiKeys());
+  }
+
   const wbi = new WbiSign(img_key, sub_key);
 
   let room_info;
@@ -101,6 +106,10 @@ async function loader() {
       ctx.roomId,
       ctx.ts
     );
+
+    // 重新获取 key
+    img_key = '';
+    sub_key = '';
 
     if (!timer) {
       timer = setInterval(function () {
