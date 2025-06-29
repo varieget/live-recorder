@@ -58,7 +58,7 @@ async function init() {
 
     ({ b_3 } = await getBuvid());
     ({ room_info } = await getInfoByRoom(ctx.roomId, wbi));
-    ({ token } = await getDanmuInfo(room_info.room_id, wbi));
+    ({ token } = await getDanmuInfo(room_info.room_id, wbi, b_3));
   } catch (e) {
     console.error(
       '[%s] %s: %s init catch error.',

@@ -57,7 +57,13 @@ export const getBuvid = async () => {
   }
 };
 
-export const getDanmuInfo = async (roomId: number, wbi: WbiSign) => {
+export const getDanmuInfo = async (
+  roomId: number,
+  wbi: WbiSign,
+  b_3: string
+) => {
+  headers.append('cookie', `buvid3=${b_3};`);
+
   const res = await fetch(
     wbi.sign(
       'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo',
