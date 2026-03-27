@@ -1,4 +1,5 @@
-import fs from 'node:fs';
+import { createWriteStream } from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import Client from 'bilibili-ws-client';
@@ -33,7 +34,7 @@ let ctx: Context = {
 const pwd = () =>
   path.resolve(import.meta.dirname, `../record_${ts}/${ctx.roomId}/${ctx.ts}`);
 
-function mkdir(newTask = false) {
+async function mkdir(newTask = false) {
   if (ctx.fetching) return;
 
   if (newTask) {
@@ -43,14 +44,14 @@ function mkdir(newTask = false) {
   ctx.ts = Math.floor(Date.now() / 1000);
 
   // mkdir
-  fs.mkdirSync(pwd(), { recursive: true });
+  await fs.mkdir(pwd(), { recursive: true });
 }
 
 async function init() {
   // 初始化前需停止 fetching 再创建新文件夹
   if (ctx.fetching) return;
 
-  mkdir();
+  await mkdir();
 
   let b_3: string, room_info: any, token: string;
   try {
@@ -60,12 +61,13 @@ async function init() {
     ({ b_3 } = await getBuvid());
     ({ room_info } = await getInfoByRoom(ctx.roomId, wbi));
     ({ token } = await getDanmuInfo(room_info.room_id, wbi, b_3));
-  } catch (e) {
+  } catch (err) {
     console.error(
-      '[%s] %s: %s init catch error.',
+      '[%s] %s: %s init catch error: %s',
       new Date().toLocaleString(),
       ctx.roomId,
-      ctx.ts
+      ctx.ts,
+      err
     );
 
     // sleep 10s
@@ -100,12 +102,13 @@ async function loader() {
   let room_info;
   try {
     ({ room_info } = await getInfoByRoom(ctx.roomId, wbi));
-  } catch (e) {
+  } catch (err) {
     console.error(
-      '[%s] %s: %s loader getInfoByRoom catch error.',
+      '[%s] %s: %s loader getInfoByRoom catch error: %s',
       new Date().toLocaleString(),
       ctx.roomId,
-      ctx.ts
+      ctx.ts,
+      err
     );
 
     // 重新获取 key
@@ -143,7 +146,7 @@ async function loader() {
       }
 
       // 重新初始化目录
-      mkdir();
+      await mkdir();
 
       console.log(
         '[%s] %s: %s fetching.',
@@ -156,7 +159,7 @@ async function loader() {
       ctx.fetching = true;
 
       // write into room_info.json
-      fs.writeFileSync(
+      await fs.writeFile(
         path.resolve(pwd(), 'room_info.json'),
         JSON.stringify(room_info)
       );
@@ -164,23 +167,35 @@ async function loader() {
       const filename = path.basename(new URL(res.url).pathname, '.flv');
       ctx.filename = filename + '.flv';
 
-      const writer = fs.createWriteStream(path.resolve(pwd(), ctx.filename));
+      const writer = createWriteStream(path.resolve(pwd(), ctx.filename));
 
-      // res.body is a Readable stream
-      const reader = res.body!;
-      await pipeline(reader, writer);
+      try {
+        // res.body is a Readable stream
+        const reader = res.body!;
+        await pipeline(reader, writer);
+      } catch (err) {
+        console.error(
+          '[%s] %s: %s pipeline error: %s',
+          new Date().toLocaleString(),
+          ctx.roomId,
+          ctx.ts,
+          err
+        );
+      } finally {
+        console.log(
+          '[%s] %s: %s fetch end.',
+          new Date().toLocaleString(),
+          ctx.roomId,
+          ctx.ts
+        );
 
-      console.log(
-        '[%s] %s: %s fetch end.',
-        new Date().toLocaleString(),
-        ctx.roomId,
-        ctx.ts
-      );
+        ctx.fetching = false;
 
-      ctx.fetching = false;
+        writer.destroy();
 
-      // 防止因网络波动而 end 的情况
-      loader();
+        // 防止因网络波动而 end 的情况
+        loader();
+      }
     } else {
       if (!timer) {
         // 停止推流后，但没有下播
@@ -196,12 +211,13 @@ async function loader() {
         }, 10 * 1000);
       }
     }
-  } catch (e) {
+  } catch (err) {
     console.error(
-      '[%s] %s: %s fetch catch error.',
+      '[%s] %s: %s fetch catch error: %s',
       new Date().toLocaleString(),
       ctx.roomId,
-      ctx.ts
+      ctx.ts,
+      err
     );
 
     ctx.fetching = false;
@@ -245,20 +261,22 @@ export default async function (shortId: number) {
     // msgBody
     if (ts - (lastMsgBody?.ts || ts) <= 70) {
       if (op === 3 && !ctx.fetching && ts - ctx.ts > 3600) {
-        const filename = path.resolve(pwd(), ctx.filename);
+        const file = await fs
+          .stat(path.resolve(pwd(), ctx.filename))
+          .catch(() => null);
 
-        if (fs.existsSync(filename)) {
+        if (file) {
           // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
-          const mtime = Math.floor(fs.statSync(filename).mtimeMs / 1000);
+          const mtime = Math.floor(file.mtimeMs / 1000);
 
           if (ts > mtime + 60 * 5) {
             // 收到心跳的时间戳大于 flv 文件最后修改时间 60 * 5 秒
-            mkdir(true);
+            await mkdir(true);
           }
         }
       }
 
-      fs.appendFileSync(
+      await fs.appendFile(
         path.resolve(pwd(), 'sub.json'),
         `${JSON.stringify(msgBody)}\n`
       );

@@ -1,21 +1,21 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const pwd = (...paths: string[]) => path.resolve(import.meta.dirname, ...paths);
 
 const flvPath: string[] = [];
 
-function findRecord(files: string[]) {
+async function findRecord(files: string[]) {
   for (const filename of files) {
     try {
-      const stats = fs.statSync(filename);
+      const stats = await fs.stat(filename).catch(() => null);
 
-      if (stats.isDirectory()) {
+      if (stats?.isDirectory()) {
         try {
-          const files = fs.readdirSync(filename);
-          findRecord(files.map((file) => path.join(filename, file)));
+          const files = await fs.readdir(filename);
+          await findRecord(files.map((file) => path.join(filename, file)));
         } catch (err) {
-          throw new Error(err);
+          throw err;
         }
       } else {
         if (/.flv$/.test(filename)) {
@@ -23,18 +23,17 @@ function findRecord(files: string[]) {
         }
       }
     } catch (err) {
-      throw new Error(err);
+      throw err;
     }
   }
 }
 
 try {
-  const files = fs
-    .readdirSync(pwd('../'))
+  const files = (await fs.readdir(pwd('../')))
     .filter((file) => /^record_\d+$/.test(file))
     .map((file) => pwd('../', file));
 
-  findRecord(files);
+  await findRecord(files);
 
   const hasFlv = [
     ...new Set(
@@ -50,9 +49,9 @@ try {
       const [filename] = file.match(/record_\d+/)!;
       return !hasFlv.includes(filename);
     })
-    .forEach((file) => {
-      fs.rmSync(file, { recursive: true });
+    .forEach(async (file) => {
+      await fs.rm(file, { recursive: true });
     });
 } catch (err) {
-  throw new Error(err);
+  throw err;
 }
