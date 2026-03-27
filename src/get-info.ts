@@ -1,5 +1,3 @@
-import fetch, { Headers } from 'node-fetch';
-
 import type WbiSign from './wbiSign.ts';
 
 type Result<T> = {

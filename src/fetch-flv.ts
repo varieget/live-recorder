@@ -1,4 +1,3 @@
-import fetch, { Headers } from 'node-fetch';
 import { getPlayUrl } from './get-info.ts';
 
 import type WbiSign from './wbiSign.ts';

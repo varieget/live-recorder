@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { pipeline } from 'node:stream/promises';
 import Client from 'bilibili-ws-client';
 
 import fetchFlv from './fetch-flv.ts';
@@ -165,23 +166,21 @@ async function loader() {
 
       const writer = fs.createWriteStream(path.resolve(pwd(), ctx.filename));
 
-      // res.body is a Node.js Readable stream
-      const reader = res.body;
-      reader?.pipe(writer);
+      // res.body is a Readable stream
+      const reader = res.body!;
+      await pipeline(reader, writer);
 
-      reader?.on('end', () => {
-        console.log(
-          '[%s] %s: %s fetch end.',
-          new Date().toLocaleString(),
-          ctx.roomId,
-          ctx.ts
-        );
+      console.log(
+        '[%s] %s: %s fetch end.',
+        new Date().toLocaleString(),
+        ctx.roomId,
+        ctx.ts
+      );
 
-        ctx.fetching = false;
+      ctx.fetching = false;
 
-        // 防止因网络波动而 end 的情况
-        loader();
-      });
+      // 防止因网络波动而 end 的情况
+      loader();
     } else {
       if (!timer) {
         // 停止推流后，但没有下播
