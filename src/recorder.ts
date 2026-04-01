@@ -62,6 +62,9 @@ class Recorder {
   private async mkdir(newTask: boolean = false) {
     if (this.fetching) return;
 
+    // 存在 filename 会导致收到心跳时 fs.stat 误判目录为文件
+    this.filename = '';
+
     if (
       (await fs.stat(this.pwd).catch(() => null)) &&
       (await fs.readdir(this.pwd)).length === 0
@@ -301,19 +304,24 @@ class Recorder {
 
     // msgBody
     if (ts - (this.msgBody?.ts || ts) <= 70) {
-      if (op === 3 && !this.fetching && ts - this.ts > 3600) {
+      // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
+      if (op === 3 && !this.fetching && ts - this.recordTs > 3600) {
+        // filename 不存在时，判断的是目录的修改时间
+        // 串流后，判断的是 flv 的修改时间
+        // mkdir 会清空 filename
         const file = await fs
           .stat(path.resolve(this.pwd, this.filename))
           .catch(() => null);
 
-        if (file) {
-          // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
+        if (file?.isFile()) {
           const mtime = Math.floor(file.mtimeMs / 1000);
 
-          if (ts > mtime + 60 * 5) {
-            // 收到心跳的时间戳大于 flv 文件最后修改时间 60 * 5 秒
+          if (ts > mtime + 300) {
+            // 收到心跳的时间戳大于 flv 文件最后修改时间 300 秒
             await this.mkdir(true);
           }
+        } else {
+          await this.mkdir(true);
         }
       }
 
