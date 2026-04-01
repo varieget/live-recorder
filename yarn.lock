@@ -60,10 +60,10 @@ argparse@^2.0.1:
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
-bilibili-ws-client@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/bilibili-ws-client/-/bilibili-ws-client-3.1.0.tgz#18db9801e85337c720694014d2b60ceb36acb278"
-  integrity sha512-xHP+hWg8H+NhNtRFrKYsnjVQ77aXpO6KciYT0dRBbkUm+sS7hs4FuYFGT0qE4Io+FgX9aYVB6bYs+3q1KW5ftA==
+bilibili-ws-client@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/bilibili-ws-client/-/bilibili-ws-client-3.2.0.tgz#162efd685907548e166119f386817806bb5e975f"
+  integrity sha512-v++KRpKrtmLUqs0teGLVuKym5agjPlBi6EmIr2/S27AHPi58dD4hkb9AHfc95jJPWr8Dsw//NeCu8l8augPxWQ==
   dependencies:
     "@types/ws" "^8.18.1"
     isomorphic-ws "^5.0.0"
