@@ -37,6 +37,15 @@ const pwd = () =>
 async function mkdir(newTask = false) {
   if (ctx.fetching) return;
 
+  if (
+    (await fs.stat(pwd()).catch(() => null)) &&
+    (await fs.readdir(pwd())).length === 0
+  ) {
+    // 当前目录存在且为空时，先删除再新建
+    // 防止启动时已经在直播，多了个空目录
+    await fs.rmdir(pwd());
+  }
+
   if (newTask) {
     ts = getTimestamp();
   }
