@@ -240,7 +240,7 @@ async function loader() {
 }
 
 // app
-export default async function (shortId: number) {
+export default async function app(shortId: number) {
   ctx.roomId = shortId;
 
   // 初始化
@@ -250,15 +250,27 @@ export default async function (shortId: number) {
   let lastMsgBody: any;
 
   // 真实 roomId
-  const sub = new Client({
-    uid: 0, // 留空或为 0 代表访客，无法显示弹幕发送用户
-    roomid: room_id,
-    protover: 3,
-    buvid: b_3 || '',
-    platform: 'web',
-    type: 2,
-    key: token,
-  });
+  const sub = new Client(
+    {
+      uid: 0, // 留空或为 0 代表访客，无法显示弹幕发送用户
+      roomid: room_id,
+      protover: 3,
+      buvid: b_3 || '',
+      platform: 'web',
+      type: 2,
+      key: token,
+    },
+    false,
+    // (...args) =>
+    //   console.log(
+    //     '[%s] %s: %s client log:',
+    //     new Date().toLocaleString(),
+    //     ctx.roomId,
+    //     ctx.ts,
+    //     ...args
+    //   ),
+    0 // 接管自动重试，手动 sub.close()，重新调用 app(ctx.roomId) 获取新 token
+  );
 
   sub.on('message', async (msgBody) => {
     const { op, cmd, body, ts } = msgBody;
@@ -290,7 +302,7 @@ export default async function (shortId: number) {
         `${JSON.stringify(msgBody)}\n`
       );
     } else {
-      await init();
+      sub.close();
     }
 
     lastMsgBody = msgBody;
@@ -329,11 +341,16 @@ export default async function (shortId: number) {
     }
   });
 
+  sub.on('close', () => {
+    app(ctx.roomId);
+  });
+
   sub.on('error', (err) => {
     console.error(
-      '[%s] %s: %s',
+      '[%s] %s: %s client error: %s',
       new Date().toLocaleString(),
-      err.name,
+      ctx.roomId,
+      ctx.ts,
       err.message
     );
   });
