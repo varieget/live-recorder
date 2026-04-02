@@ -65,25 +65,20 @@ class Recorder {
     // 存在 filename 会导致收到心跳时 fs.stat 误判目录为文件
     this.filename = '';
 
-    if (
-      (await fs.stat(this.pwd).catch(() => null)) &&
-      (await fs.readdir(this.pwd)).length === 0
-    ) {
-      // 当前目录存在且为空时，先删除再新建
-      // 防止启动时已经在直播，多了个空目录
-      await fs.rmdir(this.pwd);
-    }
+    const newTs = getTimestamp();
+    const newRecordTs = newTask ? newTs : this.recordTs;
 
-    const ts = getTimestamp();
-
-    if (newTask) {
-      this.recordTs = ts;
-    }
-
-    this.ts = ts;
+    const newPath = path.resolve(
+      import.meta.dirname,
+      `../record_${newRecordTs}/${this.roomId}/${newTs}`
+    );
 
     // mkdir
-    await fs.mkdir(this.pwd, { recursive: true });
+    await fs.mkdir(newPath, { recursive: true });
+
+    // 目录创建成功后，才能更新 this.pwd
+    this.recordTs = newRecordTs;
+    this.ts = newTs;
   }
 
   /**
