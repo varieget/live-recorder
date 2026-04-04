@@ -24,8 +24,6 @@ class Recorder {
   private fetching: boolean = false;
   private filename: string = '';
 
-  private timer: NodeJS.Timeout | null = null;
-
   private img_key?: string = '';
   private sub_key?: string = '';
 
@@ -46,6 +44,8 @@ class Recorder {
 
   /**
    * 打印当前工作目录
+   *
+   * 优先使用 mkdir 的返回值，this.pwd 用于兜底
    * @returns {string} 文件夹路径
    */
   private get pwd(): string {
@@ -159,6 +159,9 @@ class Recorder {
           err
         );
 
+        // sleep 10s
+        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+
         return await this.loader(true, room_info);
       }
     }
@@ -181,6 +184,9 @@ class Recorder {
         this.img_key = '';
         this.sub_key = '';
 
+        // sleep 10s
+        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+
         return await this.loader(true);
       }
     }
@@ -196,18 +202,6 @@ class Recorder {
       const res = await fetchFlv(room_info.room_id, wbi); // 真实 roomId
 
       if (res.ok) {
-        if (this.timer) {
-          clearInterval(this.timer);
-          this.timer = null;
-
-          console.log(
-            `[%s] %s: %s clear loader Interval`,
-            new Date().toLocaleString(),
-            this.roomId,
-            this.ts
-          );
-        }
-
         // 强制创建新目录
         // 优先使用 pwd，避免因 this.pwd 尚未更新而写入在旧目录下
         const pwd = (await this.mkdir(false, true)) || this.pwd;
@@ -258,21 +252,19 @@ class Recorder {
           return await this.loader();
         }
       } else {
-        if (!this.timer) {
-          // 停止推流后，但没有下播
-          console.log(
-            '[%s] %s: %s loader Interval',
-            new Date().toLocaleString(),
-            this.roomId,
-            this.ts
-          );
+        // fetchFlv 返回非 200 状态码时，重试获取直播流
+        // 停止推流后，但没有下播
+        console.log(
+          '[%s] %s: %s fetch failed.',
+          new Date().toLocaleString(),
+          this.roomId,
+          this.ts
+        );
 
-          this.fetching = false;
+        // sleep 10s
+        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
 
-          this.timer = setInterval(() => {
-            this.loader();
-          }, 10 * 1000);
-        }
+        return await this.loader(true, room_info);
       }
     } catch (err) {
       console.error(
@@ -283,13 +275,10 @@ class Recorder {
         err
       );
 
-      this.fetching = false;
+      // sleep 10s
+      await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
 
-      if (!this.timer) {
-        this.timer = setInterval(() => {
-          this.loader();
-        }, 10 * 1000);
-      }
+      return await this.loader(true, room_info);
     }
   }
 
@@ -359,22 +348,25 @@ class Recorder {
           // 开播 可以获取直播流
           // 切换 码率kbps 帧率fps 也会触发 LIVE
           this.loader();
+
+          console.log(
+            '[%s] %s: %s LIVE',
+            new Date().toLocaleString(),
+            this.roomId,
+            this.ts
+          );
+
           break;
         case 'PREPARING':
           // 闲置（下播）
           this.fetching = false;
 
-          if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-
-            console.log(
-              '[%s] %s: %s PREPARING clear Interval',
-              new Date().toLocaleString(),
-              this.roomId,
-              this.ts
-            );
-          }
+          console.log(
+            '[%s] %s: %s PREPARING',
+            new Date().toLocaleString(),
+            this.roomId,
+            this.ts
+          );
 
           break;
         default:
