@@ -58,9 +58,14 @@ class Recorder {
   /**
    * 创建目录
    * @param {boolean} newTask - 是否创建新任务（新文件夹）
+   * @param {boolean} force - 是否强制创建
+   * @returns {Promise<string | undefined>} 创建的目录路径
    */
-  private async mkdir(newTask: boolean = false) {
-    if (this.fetching) return;
+  private async mkdir(
+    newTask: boolean = false,
+    force: boolean = false
+  ): Promise<string | undefined> {
+    if (!force && this.fetching) return;
 
     // 存在 filename 会导致收到心跳时 fs.stat 误判目录为文件
     this.filename = '';
@@ -79,6 +84,8 @@ class Recorder {
     // 目录创建成功后，才能更新 this.pwd
     this.recordTs = newRecordTs;
     this.ts = newTs;
+
+    return newPath;
   }
 
   /**
@@ -120,7 +127,7 @@ class Recorder {
 
     // 防止启动时已经在直播
     if (room_info.live_status === 1) {
-      this.loader(room_info);
+      this.loader(false, room_info);
     }
 
     return { b_3, room_info, token };
@@ -128,15 +135,32 @@ class Recorder {
 
   /**
    * flv loader
+   * @param {boolean} force - 是否强制执行，绕过 fetching 锁定
    * @param {any} room_info - 直播间信息（可选），避免重复请求 room_info
    */
-  private async loader(room_info?: any) {
-    if (this.fetching) return;
+  private async loader(force: boolean = false, room_info?: any): Promise<void> {
+    if (!force && this.fetching) return;
+
+    // 防止由于 LIVE 的多次下发导致重复 fetch
+    // 需要在 fetchFlv 前锁定状态，避免多次 fetchFlv 导致的重复请求和文件写入
+    this.fetching = true;
 
     if (!this.img_key || !this.sub_key) {
-      const { img_key, sub_key } = await getWbiKeys();
-      this.img_key = img_key;
-      this.sub_key = sub_key;
+      try {
+        const { img_key, sub_key } = await getWbiKeys();
+        this.img_key = img_key;
+        this.sub_key = sub_key;
+      } catch (err) {
+        console.error(
+          '[%s] %s: %s loader getWbiKeys catch error: %s',
+          new Date().toLocaleString(),
+          this.roomId,
+          this.ts,
+          err
+        );
+
+        return await this.loader(true, room_info);
+      }
     }
 
     const wbi = new WbiSign(this.img_key, this.sub_key);
@@ -157,19 +181,14 @@ class Recorder {
         this.img_key = '';
         this.sub_key = '';
 
-        if (!this.timer) {
-          this.timer = setInterval(() => {
-            this.loader();
-          }, 10 * 1000);
-        }
-
-        return;
+        return await this.loader(true);
       }
     }
 
     // live_status 0闲置 1直播 2轮播
     if (room_info.live_status !== 1) {
       // 未开播时 或 已经在 fetchFlv
+      this.fetching = false;
       return;
     }
 
@@ -189,8 +208,9 @@ class Recorder {
           );
         }
 
-        // 重新初始化目录
-        await this.mkdir();
+        // 强制创建新目录
+        // 优先使用 pwd，避免因 this.pwd 尚未更新而写入在旧目录下
+        const pwd = (await this.mkdir(false, true)) || this.pwd;
 
         console.log(
           '[%s] %s: %s fetching.',
@@ -199,19 +219,16 @@ class Recorder {
           this.ts
         );
 
-        // 防止由于 LIVE 的多次下发导致重复 fetch
-        this.fetching = true;
-
         // write into room_info.json
         await fs.writeFile(
-          path.resolve(this.pwd, 'room_info.json'),
+          path.resolve(pwd, 'room_info.json'),
           JSON.stringify(room_info)
         );
 
         const filename = path.basename(new URL(res.url).pathname, '.flv');
         this.filename = filename + '.flv';
 
-        const writer = createWriteStream(path.resolve(this.pwd, this.filename));
+        const writer = createWriteStream(path.resolve(pwd, this.filename));
 
         try {
           // res.body is a Readable stream
@@ -238,7 +255,7 @@ class Recorder {
           writer.destroy();
 
           // 防止因网络波动而 end 的情况
-          this.loader();
+          return await this.loader();
         }
       } else {
         if (!this.timer) {
@@ -299,13 +316,15 @@ class Recorder {
 
     // msgBody
     if (ts - (this.msgBody?.ts || ts) <= 70) {
+      let pwd = this.pwd;
+
       // 收到心跳时，判断在非串流时且目录已经创建超过 3600 秒
       if (op === 3 && !this.fetching && ts - this.recordTs > 3600) {
         // filename 不存在时，判断的是目录的修改时间
         // 串流后，判断的是 flv 的修改时间
         // mkdir 会清空 filename
         const file = await fs
-          .stat(path.resolve(this.pwd, this.filename))
+          .stat(path.resolve(pwd, this.filename))
           .catch(() => null);
 
         if (file?.isFile()) {
@@ -313,15 +332,15 @@ class Recorder {
 
           if (ts > mtime + 300) {
             // 收到心跳的时间戳大于 flv 文件最后修改时间 300 秒
-            await this.mkdir(true);
+            pwd = (await this.mkdir(true)) || this.pwd;
           }
         } else {
-          await this.mkdir(true);
+          pwd = (await this.mkdir(true)) || this.pwd;
         }
       }
 
       await fs.appendFile(
-        path.resolve(this.pwd, 'sub.json'),
+        path.resolve(pwd, 'sub.json'),
         `${JSON.stringify(msgBody)}\n`
       );
     } else {
