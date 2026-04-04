@@ -85,7 +85,9 @@ class Recorder {
    * 初始化录制器
    * @returns 初始化信息，包括 b_3、room_info 和 token
    */
-  public async init() {
+  public async init(): Promise<
+    { b_3: string; room_info: any; token: string } | undefined
+  > {
     // 初始化前需停止 fetching 再创建新文件夹
     if (this.fetching) return;
 
@@ -113,9 +115,7 @@ class Recorder {
 
       // sleep 10s
       await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
-      this.init();
-
-      return;
+      return await this.init(); // 用 await 保证序列化重试
     }
 
     // 防止启动时已经在直播
