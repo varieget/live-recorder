@@ -264,7 +264,7 @@ class Recorder {
         // sleep 10s
         await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
 
-        return await this.loader(true, room_info);
+        return await this.loader(true);
       }
     } catch (err) {
       console.error(
